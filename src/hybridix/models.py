@@ -10,3 +10,14 @@ class DocumentMetadata:
 class Document:
     content: str
     metadata: DocumentMetadata
+
+@dataclass(slots=True, kw_only=True)
+class ChunkMetadata(DocumentMetadata):
+    strategy: str
+    chunk_index: int
+    heading: str | None = None
+
+@dataclass(slots=True)
+class Chunk:
+    content: str
+    metadata: ChunkMetadata
