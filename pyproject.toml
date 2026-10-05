@@ -7,7 +7,9 @@ authors = [
     { name = "alihassanwarsi", email = "contact.alix27@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0.3",
+]
 
 [project.scripts]
 hybridix = "hybridix:main"
