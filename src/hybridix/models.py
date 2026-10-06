@@ -13,6 +13,7 @@ class Document:
 
 @dataclass(slots=True, kw_only=True)
 class ChunkMetadata(DocumentMetadata):
+    chunk_id: str
     strategy: str
     chunk_index: int
     heading: str | None = None
