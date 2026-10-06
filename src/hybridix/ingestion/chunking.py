@@ -1,4 +1,5 @@
 from hashlib import sha256
+from hybridix.config import settings
 from hybridix.models import Chunk, ChunkMetadata, Document
 
 def _is_heading(line:str) -> bool:
@@ -8,7 +9,7 @@ def _generate_chunk_id(source: str, strategy: str, heading: str | None, content:
     raw = f"{source}:{strategy}:{heading}:{chunk_index}:{content}"
     return sha256(raw.encode("utf-8")).hexdigest()[:16]
 
-def _split_large_section(text: str, max_chars: int = 2000, overlap: int = 200) -> list[str]:
+def _split_large_section(text: str, max_chars: int = settings.chunk_size, overlap: int = settings.chunk_overlap) -> list[str]:
     if len(text) <= max_chars:
         return [text]
 

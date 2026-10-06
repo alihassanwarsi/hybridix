@@ -1,10 +1,11 @@
 from functools import lru_cache
 from sentence_transformers import SentenceTransformer
+from hybridix.config import settings
 from hybridix.models import Chunk
 
 @lru_cache(maxsize=1)
 def get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    return SentenceTransformer(settings.embedding_model)
 
 def embed_chunks(chunks: list[Chunk]):
     model = get_embedding_model()
