@@ -22,3 +22,8 @@ class ChunkMetadata(DocumentMetadata):
 class Chunk:
     content: str
     metadata: ChunkMetadata
+
+@dataclass(slots=True)
+class RetrievalResult:
+    chunk: Chunk
+    score: float
