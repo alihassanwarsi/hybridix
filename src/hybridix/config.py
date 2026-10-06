@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     chroma_collection_name: str = "hybridix"
 
     dense_top_k: int = 10
+    sparse_top_k: int = 10
 
     model_config = SettingsConfigDict(
         env_file=".env",
