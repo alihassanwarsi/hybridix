@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = 200
 
     dense_index_path: Path = Path("data/indexes/dense")
+    sparse_index_path: Path = Path("data/indexes/sparse")
 
     chroma_collection_name: str = "hybridix"
 
