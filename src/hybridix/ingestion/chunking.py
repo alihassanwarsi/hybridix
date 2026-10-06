@@ -3,6 +3,24 @@ from hybridix.models import Chunk, ChunkMetadata, Document
 def _is_heading(line:str) -> bool:
     return line.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### "))
 
+def _split_large_section(text: str, max_chars: int = 2000, overlap: int = 200) -> list[str]:
+    if len(text) <= max_chars:
+        return [text]
+
+    sections = []
+    start = 0
+
+    while start < len(text):
+        end = start + max_chars
+        section = text[start:end].strip()
+
+        if section:
+            sections.append(section)
+
+        start = end - overlap
+
+    return sections
+
 def chunk_by_headings(document: Document) -> list[Chunk]:
     chunks: list[Chunk] = []
     current_lines: list[str] = []
@@ -18,19 +36,21 @@ def chunk_by_headings(document: Document) -> list[Chunk]:
         if not content:
             return
 
-        chunks.append(
-            Chunk(
-                content=content,
-                metadata=ChunkMetadata(
-                    source=document.metadata.source,
-                    file_type=document.metadata.file_type,
-                    title=document.metadata.title,
-                    strategy="heading",
-                    chunk_index=len(chunks),
-                    heading=current_heading
+        sections = _split_large_section(content)
+        for section in sections:
+            chunks.append(
+                Chunk(
+                    content=section,
+                    metadata=ChunkMetadata(
+                        source=document.metadata.source,
+                        file_type=document.metadata.file_type,
+                        title=document.metadata.title,
+                        strategy="heading",
+                        chunk_index=len(chunks),
+                        heading=current_heading
+                    )
                 )
             )
-        )
 
     for line in document.content.splitlines():
         stripped = line.strip()
