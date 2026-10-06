@@ -1,3 +1,4 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -5,6 +6,10 @@ class Settings(BaseSettings):
 
     chunk_size: int = 2000
     chunk_overlap: int = 200
+
+    dense_index_path: Path = Path("data/indexes/dense")
+
+    chroma_collection_name: str = "hybridix"
 
     model_config = SettingsConfigDict(
         env_file=".env",
