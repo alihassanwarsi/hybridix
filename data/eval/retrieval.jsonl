@@ -1,0 +1,5 @@
+{"query":"What is Discord's global rate limit?","relevant":[{"source":"topics/rate-limits.mdx","heading":"Global Rate Limit"}]}
+{"query":"How does Discord API rate limiting work?","relevant":[{"source":"topics/rate-limits.mdx","heading":null}]}
+{"query":"What happens when gateway events are rate limited?","relevant":[{"source":"events/gateway-events.mdx","heading":"Rate Limited"}]}
+{"query":"Where is the Discord API base URL documented?","relevant":[{"source":"reference.mdx","heading":null}]}
+{"query":"How are rate limits described in the API reference?","relevant":[{"source":"reference.mdx","heading":"Rate Limiting"}]}
