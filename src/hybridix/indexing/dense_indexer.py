@@ -1,11 +1,14 @@
 import chromadb
+from functools import lru_cache
 from hybridix.config import settings
 from hybridix.indexing.embeddings import embed_chunks
 from hybridix.models import Chunk
 
-def get_collection():
-    client = chromadb.PersistentClient(path=settings.dense_index_path)
+@lru_cache(maxsize=1)
+def get_client():
+    return chromadb.PersistentClient(path=str(settings.dense_index_path))
 
+def _get_or_create_collection(client):
     return client.get_or_create_collection(
         name=settings.chroma_collection_name,
         embedding_function=None,
@@ -14,11 +17,24 @@ def get_collection():
         }
     )
 
+def get_collection():
+    return _get_or_create_collection(get_client())
+
+def reset_collection():
+    client = get_client()
+
+    try:
+        client.delete_collection(name=settings.chroma_collection_name)
+    except ValueError:
+        pass
+
+    return _get_or_create_collection(client)
+
 def build_dense_index(chunks: list[Chunk]) -> None:
     if not chunks:
         raise ValueError("No chunks provided for indexing.")
 
-    collection = get_collection()
+    collection = reset_collection()
     embeddings = embed_chunks(chunks)
 
     ids = []
@@ -33,7 +49,7 @@ def build_dense_index(chunks: list[Chunk]) -> None:
             "source": chunk.metadata.source,
             "file_type": chunk.metadata.file_type,
             "strategy": chunk.metadata.strategy,
-            "chunk_index": chunk.metadata.chunk_index
+            "chunk_index": chunk.metadata.chunk_index,
         }
 
         if chunk.metadata.title is not None:
@@ -47,6 +63,6 @@ def build_dense_index(chunks: list[Chunk]) -> None:
     collection.upsert(
         ids=ids,
         documents=documents,
-        metadatas=metadatas,
-        embeddings=embeddings.tolist()
+        embeddings=embeddings.tolist(),
+        metadatas=metadatas
     )
