@@ -2,6 +2,7 @@ import bm25s
 from bm25s.tokenization import Tokenizer
 from hybridix.config import settings
 from hybridix.models import Chunk
+from hybridix.indexing.search_text import build_search_text
 
 def build_sparse_index(chunks: list[Chunk]) -> None:
     if not chunks:
@@ -21,7 +22,7 @@ def build_sparse_index(chunks: list[Chunk]) -> None:
     for chunk in chunks
 ]
 
-    texts = [chunk.content for chunk in chunks]
+    texts = [build_search_text(chunk) for chunk in chunks]
 
     tokenizer = Tokenizer()
     corpus_tokens = tokenizer.tokenize(texts, return_as="tuple")

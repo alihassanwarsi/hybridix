@@ -1,7 +1,8 @@
 import chromadb
 from functools import lru_cache
 from hybridix.config import settings
-from hybridix.indexing.embeddings import embed_chunks
+from hybridix.indexing.embeddings import embed_texts
+from hybridix.indexing.search_text import build_search_text
 from hybridix.models import Chunk
 
 @lru_cache(maxsize=1)
@@ -35,7 +36,9 @@ def build_dense_index(chunks: list[Chunk]) -> None:
         raise ValueError("No chunks provided for indexing.")
 
     collection = reset_collection()
-    embeddings = embed_chunks(chunks)
+    search_texts = [build_search_text(chunk) for chunk in chunks]
+
+    embeddings = embed_texts(search_texts)
 
     ids = []
     documents = []

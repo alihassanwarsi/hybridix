@@ -16,3 +16,7 @@ def embed_chunks(chunks: list[Chunk]):
 def embed_query(query: str):
     model = get_embedding_model()
     return model.encode(query, normalize_embeddings=True)
+
+def embed_texts(texts: list[str]):
+    model = get_embedding_model()
+    return model.encode(texts, normalize_embeddings=True)
