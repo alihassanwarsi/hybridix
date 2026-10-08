@@ -1,7 +1,7 @@
 [project]
 name = "hybridix"
 version = "0.1.0"
-description = "Add your description here"
+description = "A modular RAG engine focused on hybrid retrieval, grounded answer generation, citation verification, and evaluation."
 readme = "README.md"
 authors = [
     { name = "alihassanwarsi", email = "contact.alix27@gmail.com" }
@@ -15,10 +15,6 @@ dependencies = [
     "sentence-transformers>=6.1.0",
 ]
 
-[project.scripts]
-hybridix = "hybridix:main"
-
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
-
