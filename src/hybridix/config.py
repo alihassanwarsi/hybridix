@@ -1,4 +1,5 @@
 from pathlib import Path
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -16,7 +17,10 @@ class Settings(BaseSettings):
     sparse_top_k: int = 10
 
     reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    
+
+    groq_api_key: SecretStr | None = None
+    generation_model: str = "openai/gpt-oss-120b"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="HYBRIDIX_",
