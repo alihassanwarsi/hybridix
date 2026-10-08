@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     dense_top_k: int = 10
     sparse_top_k: int = 10
 
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="HYBRIDIX_",

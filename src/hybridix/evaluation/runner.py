@@ -1,11 +1,12 @@
 import json
-from collections.abc import Callable
 from pathlib import Path
+from collections.abc import Callable
 from hybridix.evaluation.retrieval import hit_at_k, reciprocal_rank
 from hybridix.models import RetrievalResult
 from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.hybrid_retriever import hybrid_search
 from hybridix.retrieval.sparse_retriever import sparse_search
+from hybridix.retrieval.reranker import reranked_search
 
 Retriever = Callable[[str, int], list[RetrievalResult]]
 
@@ -44,7 +45,8 @@ def run_retrieval_evaluation(path: Path, k: int = 5,) -> None:
     retrievers = {
         "dense": dense_search,
         "sparse": sparse_search,
-        "hybrid": hybrid_search
+        "hybrid": hybrid_search,
+        "reranked": reranked_search
     }
 
     for name, retriever in retrievers.items():
