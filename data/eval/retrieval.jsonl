@@ -1,5 +1,30 @@
-{"query":"What is Discord's global rate limit?","relevant":[{"source":"topics/rate-limits.mdx","heading":"Global Rate Limit"}]}
-{"query":"How does Discord API rate limiting work?","relevant":[{"source":"topics/rate-limits.mdx","heading":null}]}
-{"query":"What happens when gateway events are rate limited?","relevant":[{"source":"events/gateway-events.mdx","heading":"Rate Limited"}]}
-{"query":"Where is the Discord API base URL documented?","relevant":[{"source":"reference.mdx","heading":null}]}
-{"query":"How are rate limits described in the API reference?","relevant":[{"source":"reference.mdx","heading":"Rate Limiting"}]}
+{"query": "After Discord returns a 429 rate limit response, what should an app use to determine when to retry?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Exceeding A Rate Limit"}]}
+{"query": "What is Discord's global API request limit for bots?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Global Rate Limit"}]}
+{"query": "Which HTTP response statuses count toward Discord's invalid request limit?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Invalid Request Limit aka Cloudflare bans"}]}
+{"query": "Where can I find the list of OAuth2 scopes supported by Discord?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "OAuth2 Scopes"}]}
+{"query": "How does Discord's OAuth2 authorization code grant work without exposing the user's credentials to the client?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "Authorization Code Grant"}]}
+{"query": "How are Discord bot accounts different from normal user accounts?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "Bot vs User Accounts"}]}
+{"query": "How does Discord's role hierarchy restrict what roles or users a bot can manage?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Permission Hierarchy"}]}
+{"query": "How are conflicting channel permission overwrites resolved for a Discord user?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Permission Overwrites"}]}
+{"query": "Which permission is required to send messages in threads instead of inheriting SEND_MESSAGES?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Inherited Permissions (Threads)"}]}
+{"query": "Which Discord endpoint should an app call to get the WebSocket URL before connecting to the Gateway?", "relevant": [{"source": "events/gateway.mdx", "heading": "Connecting"}]}
+{"query": "How should an app keep a Discord Gateway connection alive after connecting?", "relevant": [{"source": "events/gateway.mdx", "heading": "Sending Heartbeats"}]}
+{"query": "How should a Discord client decide whether to resume or re-identify after a Gateway disconnect?", "relevant": [{"source": "events/gateway.mdx", "heading": "Handling a Disconnect"}]}
+{"query": "How is a Discord Gateway shard ID calculated from a guild ID?", "relevant": [{"source": "events/gateway.mdx", "heading": "Sharding Formula"}]}
+{"query": "Which Gateway payload is used to perform the initial handshake with Discord?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Identify"}]}
+{"query": "What information is required to resume a disconnected Discord Gateway session?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Resume"}]}
+{"query": "How can a Gateway client request guild members that were not initially sent?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Request Guild Members"}]}
+{"query": "How should an interactions endpoint respond when Discord sends a PING request?", "relevant": [{"source": "interactions/overview.mdx", "heading": "Acknowledging PING requests"}]}
+{"query": "Which request headers must be validated when receiving Discord interactions over HTTP?", "relevant": [{"source": "interactions/overview.mdx", "heading": "Validating Security Request Headers"}]}
+{"query": "What are the supported ways for an app to respond to a Discord interaction?", "relevant": [{"source": "interactions/receiving-and-responding.mdx", "heading": "Responding to an Interaction"}]}
+{"query": "How can an app edit its original interaction response or send followup messages?", "relevant": [{"source": "interactions/receiving-and-responding.mdx", "heading": "Followup Messages"}]}
+{"query": "Where are global application commands available and how are updates handled?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Making a Global Command"}]}
+{"query": "Why are guild application commands useful for quick testing?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Making a Guild Command"}]}
+{"query": "How does Discord indicate which application command option the user is currently typing for autocomplete?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Autocomplete"}]}
+{"query": "Why are Discord snowflake IDs returned as strings in the HTTP API?", "relevant": [{"source": "reference.mdx", "heading": "Snowflakes"}]}
+{"query": "What are the two supported ways to authenticate with the Discord API?", "relevant": [{"source": "reference.mdx", "heading": "Authentication"}]}
+{"query": "How can a Discord CDN image URL be changed to request a different image format or size?", "relevant": [{"source": "reference.mdx", "heading": "Image Formatting"}]}
+{"query": "What content must be provided when executing a Discord webhook, and how can the wait parameter affect the response?", "relevant": [{"source": "resources/webhook.mdx", "heading": "Execute Webhook"}]}
+{"query": "How does allowed_mentions control whether users receive notifications from mentions in a Discord message?", "relevant": [{"source": "resources/message.mdx", "heading": "Allowed Mentions Object"}]}
+{"query": "What permission and message-count constraints apply when bulk deleting Discord messages?", "relevant": [{"source": "resources/message.mdx", "heading": "Bulk Delete Messages"}]}
+{"query": "What permission is required to retrieve a guild audit log, and how are entries ordered with before or after?", "relevant": [{"source": "resources/audit-log.mdx", "heading": "Get Guild Audit Log"}]}
