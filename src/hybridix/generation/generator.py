@@ -2,8 +2,10 @@ from groq import Groq
 from hybridix.config import settings
 from hybridix.generation.citations import resolve_citations
 from hybridix.generation.context import build_context
-from hybridix.generation.prompts import SYSTEM_PROMPT
+from hybridix.generation.prompts import load_prompt
 from hybridix.models import GeneratedAnswer, RetrievalResult
+
+SYSTEM_PROMPT = load_prompt("answer_generation.txt")
 
 def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnswer:
     if settings.groq_api_key is None:
@@ -18,7 +20,7 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
         messages=[
             {
                 "role": "system",
-                "content": SYSTEM_PROMPT,
+                "content": SYSTEM_PROMPT
             },
             {
                 "role": "user",
