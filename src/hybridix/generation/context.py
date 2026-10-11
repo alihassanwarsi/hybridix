@@ -11,6 +11,6 @@ def build_context(results: list[RetrievalResult]) -> str:
         if metadata.heading:
             header += f" | Section: {metadata.heading}"
 
-        sections.append(f"[{header}]\n{result.chunk.content}")
+        sections.append(f"{header}\n{result.chunk.content}")
 
     return"\n\n".join(sections)

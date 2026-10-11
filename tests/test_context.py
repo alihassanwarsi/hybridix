@@ -21,7 +21,8 @@ def test_build_context_formats_retrieved_chunks():
 
     context = build_context(results)
 
-    assert "Source: interactions/application-commands.mdx" in context
-    assert "Section: Making a Global Command" in context
-    assert "Global commands are available" in context
-    assert "[1] Source: interactions/application-commands.mdx" in context
+    assert context == (
+    "[1] Source: interactions/application-commands.mdx "
+    "| Section: Making a Global Command\n"
+    "Global commands are available on all your app's guilds."
+)
