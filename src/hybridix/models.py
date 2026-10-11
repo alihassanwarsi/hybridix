@@ -27,3 +27,16 @@ class Chunk:
 class RetrievalResult:
     chunk: Chunk
     score: float
+
+@dataclass(slots=True)
+class Citation:
+    number: int
+    chunk_id: str
+    source: str
+    heading: str | None
+    content: str
+
+@dataclass(slots=True)
+class GeneratedAnswer:
+    text: str
+    citations: list[Citation]

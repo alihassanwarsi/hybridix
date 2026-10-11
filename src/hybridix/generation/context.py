@@ -3,10 +3,10 @@ from hybridix.models import RetrievalResult
 def build_context(results: list[RetrievalResult]) -> str:
     sections = []
 
-    for result in results:
+    for number, result in enumerate(results, start=1):
         metadata = result.chunk.metadata
         
-        header = f"Source: {metadata.source}"
+        header = f"[{number}] Source: {metadata.source}"
 
         if metadata.heading:
             header += f" | Section: {metadata.heading}"

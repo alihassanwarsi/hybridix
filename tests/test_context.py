@@ -24,3 +24,4 @@ def test_build_context_formats_retrieved_chunks():
     assert "Source: interactions/application-commands.mdx" in context
     assert "Section: Making a Global Command" in context
     assert "Global commands are available" in context
+    assert "[1] Source: interactions/application-commands.mdx" in context
