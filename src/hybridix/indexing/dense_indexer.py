@@ -1,4 +1,5 @@
 import chromadb
+from chromadb.errors import NotFoundError
 from functools import lru_cache
 from hybridix.config import settings
 from hybridix.indexing.embeddings import embed_texts
@@ -26,7 +27,7 @@ def reset_collection():
 
     try:
         client.delete_collection(name=settings.chroma_collection_name)
-    except ValueError:
+    except NotFoundError:
         pass
 
     return _get_or_create_collection(client)

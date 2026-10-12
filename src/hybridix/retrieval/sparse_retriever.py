@@ -1,6 +1,5 @@
 import bm25s
 from bm25s.tokenization import Tokenizer
-
 from hybridix.config import settings
 from hybridix.models import Chunk, ChunkMetadata, RetrievalResult
 
@@ -10,11 +9,18 @@ def sparse_search(query: str, top_k: int | None = None) -> list[RetrievalResult]
         raise ValueError("Query cannot be empty.")
 
     top_k = top_k or settings.sparse_top_k
+    index_path = settings.sparse_index_path
+
+    if not (index_path / "params.index.json").is_file():
+        raise FileNotFoundError(f"Sparse index not found at {index_path}. Build the index before searching.")
 
     retriever = bm25s.BM25.load(
-        str(settings.sparse_index_path),
-        load_corpus=True,
+        str(index_path),
+        load_corpus=True
     )
+
+    available_chunks = len(retriever.corpus)
+    top_k = min(top_k, available_chunks)
 
     tokenizer = Tokenizer()
     tokenizer.load_vocab(str(settings.sparse_index_path))
