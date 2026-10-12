@@ -10,6 +10,12 @@ def _generate_chunk_id(source: str, strategy: str, heading: str | None, content:
     return sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 def _split_large_section(text: str, max_chars: int = settings.chunk_size, overlap: int = settings.chunk_overlap) -> list[str]:
+    if max_chars <= 0:
+        raise ValueError("max_chars must be greater than zero.")
+
+    if not 0 <= overlap < max_chars:
+        raise ValueError("overlap must be non-negative and smaller than max_chars.")
+    
     if len(text) <= max_chars:
         return [text]
 
@@ -22,6 +28,9 @@ def _split_large_section(text: str, max_chars: int = settings.chunk_size, overla
 
         if section:
             sections.append(section)
+
+        if end >= len(text):
+            break
 
         start = end - overlap
 

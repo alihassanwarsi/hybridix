@@ -1,12 +1,12 @@
 from pathlib import Path
-from pydantic import SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
-    chunk_size: int = 2000
-    chunk_overlap: int = 200
+    chunk_size: int = Field(default=2000, gt=0)
+    chunk_overlap: int = Field(default=200, ge=0)
 
     dense_index_path: Path = Path("data/indexes/dense")
     sparse_index_path: Path = Path("data/indexes/sparse")
@@ -23,7 +23,15 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_prefix="HYBRIDIX_",
+        env_prefix="HYBRIDIX_"
     )
+
+    @model_validator(mode="after")
+    def validate_chunk_settings(self):
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be smaller than chunk_size.")
+
+        return self
+
 
 settings = Settings()
