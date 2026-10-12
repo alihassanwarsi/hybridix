@@ -2,6 +2,7 @@ from pathlib import Path
 from hybridix.models import GeneratedAnswer
 from hybridix.ingestion.loader import load_mdx
 from hybridix.ingestion.chunking import chunk_by_headings
+from hybridix.indexing.token_budget import fit_chunks_to_embedding_budget
 from hybridix.indexing.dense_indexer import build_dense_index
 from hybridix.indexing.sparse_indexer import build_sparse_index
 from hybridix.retrieval.reranker import reranked_search
@@ -23,6 +24,8 @@ def build_indexes(source_root: Path) -> int:
     if not chunks:
         raise ValueError("No chunks generated.")
 
+    chunks = fit_chunks_to_embedding_budget(chunks)
+    
     build_dense_index(chunks)
     build_sparse_index(chunks)
 
