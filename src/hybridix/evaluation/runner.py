@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+from datetime import datetime, timezone
 from collections.abc import Callable
+from hybridix.config import settings
 from hybridix.evaluation.retrieval import hit_at_k, reciprocal_rank
 from hybridix.models import RetrievalResult
 from hybridix.retrieval.dense_retriever import dense_search
@@ -23,10 +25,9 @@ def load_eval_cases(path: Path) -> list[dict]:
 
     return cases
 
-def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show_failures: bool = False) -> dict[str, float]:
+def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show_failures: bool = False, details: list[dict] | None = None) -> dict[str, float]:
     hits = []
     reciprocal_ranks = []
-
 
     for number, case in enumerate(cases, start=1):
         results = retriever(case["query"], k)
@@ -36,6 +37,25 @@ def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show
 
         hits.append(hit)
         reciprocal_ranks.append(rr)
+
+        if details is not None:
+            details.append({
+                "question_number": number,
+                "query": case["query"],
+                "expected": case["relevant"],
+                "hit": bool(hit),
+                "reciprocal_rank": float(rr),
+                "retrieved": [
+                    {
+                        "rank": rank,
+                        "source": result.chunk.metadata.source,
+                        "heading": result.chunk.metadata.heading,
+                        "chunk_id": result.chunk.metadata.chunk_id,
+                        "score": float(result.score)
+                    }
+                    for rank, result in enumerate(results[:k], start=1)
+                ]
+            })
 
         if show_failures and hit == 0:
             print(f"\n  MISS Q{number}: {case['query']}")
@@ -53,7 +73,8 @@ def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show
         f"mrr@{k}": sum(reciprocal_ranks) / len(reciprocal_ranks)
     }
 
-def run_retrieval_evaluation(path: Path, k: int = 5,) -> None:
+
+def run_retrieval_evaluation(path: Path, k: int = 5) -> None:
     cases = load_eval_cases(path)
 
     retrievers = {
@@ -63,11 +84,42 @@ def run_retrieval_evaluation(path: Path, k: int = 5,) -> None:
         "reranked": reranked_search
     }
 
+    report = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "dataset": str(path),
+        "total_questions": len(cases),
+        "k": k,
+        "config": {
+            "embedding_model": settings.embedding_model,
+            "reranker_model": settings.reranker_model,
+            "dense_index_path": str(settings.dense_index_path),
+            "sparse_index_path": str(settings.sparse_index_path)
+        },
+        "retrievers": {}
+    }
+
     for name, retriever in retrievers.items():
-        metrics = evaluate_retriever(cases, retriever, k,show_failures=True)
+        details = []
+
+        metrics = evaluate_retriever(cases, retriever, k, show_failures=True, details=details)
+
+        report["retrievers"][name] = {"metrics": metrics, "questions": details}
 
         print(
             name,
             f"Hit@{k}: {metrics[f'hit@{k}']:.3f}",
-            f"MRR@{k}: {metrics[f'mrr@{k}']:.3f}",
+            f"MRR@{k}: {metrics[f'mrr@{k}']:.3f}"
         )
+
+    report_dir = Path("data/eval/reports")
+    report_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+    report_path = report_dir / f"retrieval_{timestamp}.json"
+
+    report_path.write_text(
+        json.dumps(report, indent=2, ensure_ascii=False),
+        encoding="utf-8"
+    )
+
+    print(f"\nEvaluation report saved: {report_path}")
