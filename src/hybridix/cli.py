@@ -1,0 +1,81 @@
+import argparse
+from pathlib import Path
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="hybridix",
+        description="Hybridix, a modular RAG engine"
+    )
+
+    commands = parser.add_subparsers(
+        dest="command",
+        required=True
+    )
+
+    evaluate_parser = commands.add_parser(
+        "evaluate",
+        help="Evaluate retrieval performance"
+    )
+
+    evaluate_parser.add_argument(
+        "--dataset",
+        type=Path,
+        default=Path("data/eval/retrieval.jsonl")
+    )
+
+    evaluate_parser.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="Number of results to evaluate per question"
+    )
+
+    ask_parser = commands.add_parser(
+        "ask",
+        help="Ask a question about indexed documents"
+    )
+
+    ask_parser.add_argument(
+        "question",
+        help="Question to ask Hybridix"
+    )
+
+    ask_parser.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="Number of evidence chunks to retrieve"
+    )
+
+    args = parser.parse_args(argv)
+
+    if args.command == "evaluate":
+        if args.top_k < 1:
+            parser.error("--top-k must be positive")
+
+        from hybridix.evaluation.runner import run_retrieval_evaluation
+
+        run_retrieval_evaluation(path=args.dataset, k=args.top_k)
+
+    if args.command == "ask":
+        if args.top_k < 1:
+            parser.error("--top-k must be positive")
+
+        from hybridix.pipeline import answer_question
+
+        answer = answer_question(query=args.question, top_k=args.top_k)
+
+        print(f"\nAnswer:\n{answer.text}")
+
+        if answer.citations:
+            print("\nSources:")
+
+            for citation in answer.citations:
+                print(
+                    f"[{citation.number}] {citation.source}"
+                    f" | {citation.heading or 'No heading'}"
+                )
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
