@@ -9,21 +9,9 @@ from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.hybrid_retriever import hybrid_search
 from hybridix.retrieval.sparse_retriever import sparse_search
 from hybridix.retrieval.reranker import reranked_search
+from hybridix.evaluation.dataset_loader import load_eval_cases
 
 Retriever = Callable[[str, int], list[RetrievalResult]]
-
-def load_eval_cases(path: Path) -> list[dict]:
-    cases = []
-
-    with path.open(encoding="utf-8") as file:
-        for line in file:
-            if line.strip():
-                cases.append(json.loads(line))
-
-    if not cases:
-        raise ValueError("No evaluation cases found.")
-
-    return cases
 
 def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show_failures: bool = False, details: list[dict] | None = None) -> dict[str, float]:
     hits = []
