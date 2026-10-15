@@ -66,7 +66,8 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
     if not structured.claims:
         return GeneratedAnswer(
             text="I don't have enough evidence to answer.",
-            citations=[]
+            citations=[],
+            refused=True
         )
 
     sections = []

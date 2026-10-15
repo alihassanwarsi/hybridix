@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr | None = None
     generation_model: str = "openai/gpt-oss-120b"
 
+    openai_api_key: SecretStr | None = None
+    evaluation_model: str = "gpt-4.1"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="HYBRIDIX_"

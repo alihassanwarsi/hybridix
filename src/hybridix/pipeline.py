@@ -43,7 +43,8 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
     if not results:
         return GeneratedAnswer(
             text="I don't have enough evidence to answer.",
-            citations=[]
+            citations=[],
+            refused=True
         )
 
     answer = generate_answer(query, results)
@@ -53,7 +54,8 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
     if not verification.supported:
         return GeneratedAnswer(
             text="I couldn't verify an answer from the available evidence.",
-            citations=[]
+            citations=[],
+            refused=True
         )
 
     return answer

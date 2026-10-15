@@ -40,3 +40,4 @@ class Citation:
 class GeneratedAnswer:
     text: str
     citations: list[Citation]
+    refused: bool = False
