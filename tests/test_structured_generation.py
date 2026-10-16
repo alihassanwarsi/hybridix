@@ -1,4 +1,3 @@
-
 import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -47,7 +46,6 @@ def mock_generation(monkeypatch, claims):
 
     return client
 
-
 def test_structured_answer_resolves_citations(monkeypatch):
     client = mock_generation(
         monkeypatch,
@@ -75,7 +73,6 @@ def test_structured_answer_resolves_citations(monkeypatch):
 
     assert request["response_format"]["type"] == "json_schema"
 
-
 def test_unknown_evidence_is_rejected(monkeypatch):
     mock_generation(
         monkeypatch,
@@ -91,4 +88,22 @@ def test_unknown_evidence_is_rejected(monkeypatch):
         generator.generate_answer(
             "Test question",
             [make_result()]
+        )
+
+@pytest.mark.parametrize("marker", ["[1]", "[2]"])
+def test_claim_text_cannot_inject_citations(monkeypatch, marker):
+    mock_generation(
+        monkeypatch,
+        [
+            {
+                "text": f"The bucket header is X-RateLimit-Bucket {marker}.",
+                "evidence_numbers": [1]
+            }
+        ]
+    )
+
+    with pytest.raises(ValueError, match="citation markers"):
+        generator.generate_answer(
+            "Which header identifies the bucket?",
+            [make_result(), make_result()]
         )
