@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
         default=5,
         help="Number of results to evaluate per question"
     )
-    
+
     ask_parser = commands.add_parser(
         "ask",
         help="Ask a question about indexed documents"
