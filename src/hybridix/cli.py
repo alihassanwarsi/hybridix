@@ -47,6 +47,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Number of evidence chunks to retrieve"
     )
 
+    ask_parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Show additional debugging information"
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "evaluate":
@@ -63,7 +69,10 @@ def main(argv: list[str] | None = None) -> int:
 
         from hybridix.pipeline import answer_question
 
-        answer = answer_question(query=args.question, top_k=args.top_k)
+        answer = answer_question(
+            query=args.question,
+            top_k=args.top_k
+        )
 
         print(f"\nAnswer:\n{answer.text}")
 
@@ -75,6 +84,28 @@ def main(argv: list[str] | None = None) -> int:
                     f"[{citation.number}] {citation.source}"
                     f" | {citation.heading or 'No heading'}"
                 )
+
+        if args.debug:
+            print("\nDebug:")
+            print(f"Refused: {answer.refused}")
+            print(f"Refusal reason: {answer.refusal_reason or 'none'}")
+
+            if answer.verification_reason is not None:
+                print(f"Verifier reason: {answer.verification_reason}")
+
+            if answer.unverified_answer is not None:
+                print(f"\nUnverified answer:\n{answer.unverified_answer}")
+
+            if answer.retrieved_evidence:
+                print("\nRetrieved evidence:")
+
+                for rank, result in enumerate(answer.retrieved_evidence, start=1):
+                    metadata = result.chunk.metadata
+
+                    print(
+                        f"{rank}. {metadata.source}"
+                        f" | {metadata.heading or 'No heading'}"
+                    )
     return 0
 
 if __name__ == "__main__":

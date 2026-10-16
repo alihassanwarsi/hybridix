@@ -18,7 +18,6 @@ def make_answer() -> GeneratedAnswer:
         ]
     )
 
-
 def test_pipeline_returns_verified_answer(monkeypatch):
     answer = make_answer()
     results = [object()]
@@ -38,6 +37,7 @@ def test_pipeline_returns_verified_answer(monkeypatch):
 
     output = pipeline.answer_question("How do guild commands update?")
 
+    assert output.retrieved_evidence is results
     assert output is answer
     assert output.citations[0].chunk_id == "test-chunk"
 
@@ -80,7 +80,9 @@ def test_pipeline_rejects_unverified_answer(monkeypatch):
 
     assert output.text == "I couldn't verify an answer from the available evidence."
     assert output.citations == []
-
+    assert output.refusal_reason == "verifier_rejection"
+    assert output.verification_reason == "The claim is unsupported."
+    assert output.unverified_answer == answer.text
 
 def test_pipeline_handles_no_evidence(monkeypatch):
     monkeypatch.setattr(
@@ -99,6 +101,7 @@ def test_pipeline_handles_no_evidence(monkeypatch):
 
     assert output.text == "I don't have enough evidence to answer."
     assert output.citations == []
+    assert output.refusal_reason == "no_results"
 
     generate.assert_not_called()
     verify.assert_not_called()
@@ -116,3 +119,42 @@ def test_pipeline_handles_no_evidence(monkeypatch):
 def test_pipeline_rejects_invalid_input(query, top_k):
     with pytest.raises(ValueError):
         pipeline.answer_question(query, top_k=top_k)
+
+def test_pipeline_preserves_generator_refusal(monkeypatch):
+    refusal = GeneratedAnswer(
+        text="I don't have enough evidence to answer.",
+        citations=[],
+        refused=True
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "reranked_search",
+        Mock(return_value=[object()])
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "generate_answer",
+        Mock(return_value=refusal),
+    )
+
+    verifier = Mock(
+        return_value=VerificationResult(
+            supported=False,
+            reason="No cited evidence."
+        )
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "verify_answer",
+        verifier
+    )
+
+    result = pipeline.answer_question("Unknown question")
+
+    assert result is refusal
+    assert result.refused is True
+    assert result.refusal_reason == "generator_refusal"
+    verifier.assert_not_called()

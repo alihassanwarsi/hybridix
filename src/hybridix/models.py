@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class DocumentMetadata:
@@ -41,3 +41,7 @@ class GeneratedAnswer:
     text: str
     citations: list[Citation]
     refused: bool = False
+    refusal_reason: str | None = None
+    verification_reason: str | None = None
+    unverified_answer: str | None = None
+    retrieved_evidence: list[RetrievalResult] = field(default_factory=list)

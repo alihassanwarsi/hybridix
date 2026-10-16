@@ -1,3 +1,4 @@
+import re
 from groq import Groq
 from pydantic import BaseModel, ConfigDict, StrictInt
 from hybridix.config import settings
@@ -78,6 +79,9 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
 
         if not text:
             raise ValueError("Generated claim cannot be empty.")
+
+        if re.search(r"\[\d+\]", text):
+            raise ValueError("Generated claim text must not contain citation markers.")
 
         if not numbers:
             raise ValueError("Generated claim has no evidence.")

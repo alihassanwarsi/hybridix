@@ -36,7 +36,6 @@ def build_dense_index(chunks: list[Chunk]) -> None:
     if not chunks:
         raise ValueError("No chunks provided for indexing.")
 
-    collection = reset_collection()
     search_texts = [build_search_text(chunk) for chunk in chunks]
 
     embeddings = embed_texts(search_texts)
@@ -63,6 +62,8 @@ def build_dense_index(chunks: list[Chunk]) -> None:
             metadata["heading"] = chunk.metadata.heading
 
         metadatas.append(metadata)
+
+    collection = reset_collection()
 
     collection.upsert(
         ids=ids,
