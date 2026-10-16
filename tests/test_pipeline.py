@@ -116,3 +116,41 @@ def test_pipeline_handles_no_evidence(monkeypatch):
 def test_pipeline_rejects_invalid_input(query, top_k):
     with pytest.raises(ValueError):
         pipeline.answer_question(query, top_k=top_k)
+
+def test_pipeline_preserves_generator_refusal(monkeypatch):
+    refusal = GeneratedAnswer(
+        text="I don't have enough evidence to answer.",
+        citations=[],
+        refused=True
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "reranked_search",
+        Mock(return_value=[object()])
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "generate_answer",
+        Mock(return_value=refusal),
+    )
+
+    verifier = Mock(
+        return_value=VerificationResult(
+            supported=False,
+            reason="No cited evidence."
+        )
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "verify_answer",
+        verifier
+    )
+
+    result = pipeline.answer_question("Unknown question")
+
+    assert result is refusal
+    assert result.refused is True
+    verifier.assert_not_called()

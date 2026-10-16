@@ -49,6 +49,9 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
 
     answer = generate_answer(query, results)
 
+    if answer.refused:
+        return answer
+
     verification = verify_answer(answer)
 
     if not verification.supported:
