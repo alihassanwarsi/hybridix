@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import pytest
 from hybridix import cli, pipeline
@@ -91,3 +90,26 @@ def test_ask_rejects_invalid_top_k():
         ])
 
     assert exc.value.code == 2
+
+def test_ask_debug_shows_refusal_details(monkeypatch, capsys):
+    def fake_answer_question(query, top_k):
+        return GeneratedAnswer(
+            text="I couldn't verify an answer.",
+            citations=[],
+            refused=True,
+            refusal_reason="verifier_rejection",
+            verification_reason="The claim is unsupported."
+        )
+
+    monkeypatch.setattr(
+        pipeline,
+        "answer_question",
+        fake_answer_question,
+    )
+
+    cli.main(["ask", "Unknown question", "--debug"])
+
+    output = capsys.readouterr().out
+
+    assert "verifier_rejection" in output
+    assert "The claim is unsupported." in output

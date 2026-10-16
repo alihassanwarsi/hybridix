@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
         default=5,
         help="Number of results to evaluate per question"
     )
-
+    
     ask_parser = commands.add_parser(
         "ask",
         help="Ask a question about indexed documents"
@@ -45,6 +45,12 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=5,
         help="Number of evidence chunks to retrieve"
+    )
+
+    ask_parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Show additional debugging information"
     )
 
     args = parser.parse_args(argv)
@@ -63,7 +69,10 @@ def main(argv: list[str] | None = None) -> int:
 
         from hybridix.pipeline import answer_question
 
-        answer = answer_question(query=args.question, top_k=args.top_k)
+        answer = answer_question(
+            query=args.question,
+            top_k=args.top_k
+        )
 
         print(f"\nAnswer:\n{answer.text}")
 
@@ -75,6 +84,15 @@ def main(argv: list[str] | None = None) -> int:
                     f"[{citation.number}] {citation.source}"
                     f" | {citation.heading or 'No heading'}"
                 )
+
+        if args.debug:
+            print("\nDebug:")
+            print(f"Refused: {answer.refused}")
+            print(f"Refusal reason: {answer.refusal_reason or 'none'}")
+
+            if answer.verification_reason is not None:
+                print(f"Verifier reason: {answer.verification_reason}")
+
     return 0
 
 if __name__ == "__main__":
