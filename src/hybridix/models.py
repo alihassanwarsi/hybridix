@@ -43,3 +43,4 @@ class GeneratedAnswer:
     refused: bool = False
     refusal_reason: str | None = None
     verification_reason: str | None = None
+    unverified_answer: str | None = None

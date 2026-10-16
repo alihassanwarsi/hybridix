@@ -62,7 +62,8 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
             citations=[],
             refused=True,
             refusal_reason="verifier_rejection",
-            verification_reason=verification.reason
+            verification_reason=verification.reason,
+            unverified_answer=answer.text
         )
 
     return answer

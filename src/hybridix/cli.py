@@ -93,6 +93,9 @@ def main(argv: list[str] | None = None) -> int:
             if answer.verification_reason is not None:
                 print(f"Verifier reason: {answer.verification_reason}")
 
+            if answer.unverified_answer is not None:
+                print(f"\nUnverified answer:\n{answer.unverified_answer}")
+
     return 0
 
 if __name__ == "__main__":

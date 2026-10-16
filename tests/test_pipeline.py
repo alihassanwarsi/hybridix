@@ -81,6 +81,7 @@ def test_pipeline_rejects_unverified_answer(monkeypatch):
     assert output.citations == []
     assert output.refusal_reason == "verifier_rejection"
     assert output.verification_reason == "The claim is unsupported."
+    assert output.unverified_answer == answer.text
 
 def test_pipeline_handles_no_evidence(monkeypatch):
     monkeypatch.setattr(

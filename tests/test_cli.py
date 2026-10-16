@@ -98,8 +98,9 @@ def test_ask_debug_shows_refusal_details(monkeypatch, capsys):
             citations=[],
             refused=True,
             refusal_reason="verifier_rejection",
-            verification_reason="The claim is unsupported."
-        )
+            verification_reason="The claim is unsupported.",
+            unverified_answer="Discord allows 5,000 IDENTIFY calls per day. [1]"
+    )
 
     monkeypatch.setattr(
         pipeline,
@@ -113,3 +114,30 @@ def test_ask_debug_shows_refusal_details(monkeypatch, capsys):
 
     assert "verifier_rejection" in output
     assert "The claim is unsupported." in output
+    assert "Unverified answer:" in output
+    assert "Discord allows 5,000 IDENTIFY calls per day. [1]" in output
+
+def test_ask_hides_unverified_answer_without_debug(monkeypatch, capsys):
+    def fake_answer_question(query, top_k):
+        return GeneratedAnswer(
+            text="I couldn't verify an answer.",
+            citations=[],
+            refused=True,
+            refusal_reason="verifier_rejection",
+            verification_reason="The claim is unsupported.",
+            unverified_answer="Incorrect answer [1]"
+        )
+
+    monkeypatch.setattr(
+        pipeline,
+        "answer_question",
+        fake_answer_question
+    )
+
+    cli.main(["ask", "Unknown question"])
+
+    output = capsys.readouterr().out
+
+    assert "I couldn't verify an answer." in output
+    assert "Incorrect answer [1]" not in output
+    assert "Debug:" not in output
