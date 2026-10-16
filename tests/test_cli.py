@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 from hybridix import cli, pipeline
 from hybridix.evaluation import runner
-from hybridix.models import Citation, GeneratedAnswer
+from hybridix.models import Citation, GeneratedAnswer, Chunk, ChunkMetadata, RetrievalResult
 
 def test_cli_help(capsys):
     with pytest.raises(SystemExit) as exc:
@@ -141,3 +141,42 @@ def test_ask_hides_unverified_answer_without_debug(monkeypatch, capsys):
     assert "I couldn't verify an answer." in output
     assert "Incorrect answer [1]" not in output
     assert "Debug:" not in output
+
+def test_debug_shows_retrieved_evidence(monkeypatch, capsys):
+    evidence = RetrievalResult(
+        chunk=Chunk(
+            content="X-RateLimit-Bucket identifies the bucket.",
+            metadata=ChunkMetadata(
+                source="topics/rate-limits.mdx",
+                file_type="mdx",
+                chunk_id="test-chunk",
+                strategy="heading",
+                chunk_index=0,
+                heading="Rate Limit Header Examples"
+            )
+        ),
+        score=0.95
+    )
+
+    def fake_answer_question(query, top_k):
+        return GeneratedAnswer(
+            text="I don't have enough evidence to answer.",
+            citations=[],
+            refused=True,
+            refusal_reason="generator_refusal",
+            retrieved_evidence=[evidence]
+        )
+
+    monkeypatch.setattr(
+        pipeline,
+        "answer_question",
+        fake_answer_question
+    )
+
+    cli.main(["ask", "Test question", "--debug"])
+
+    output = capsys.readouterr().out
+
+    assert "Retrieved evidence:" in output
+    assert "topics/rate-limits.mdx" in output
+    assert "Rate Limit Header Examples" in output

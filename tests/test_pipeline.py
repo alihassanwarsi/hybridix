@@ -37,6 +37,7 @@ def test_pipeline_returns_verified_answer(monkeypatch):
 
     output = pipeline.answer_question("How do guild commands update?")
 
+    assert output.retrieved_evidence is results
     assert output is answer
     assert output.citations[0].chunk_id == "test-chunk"
 

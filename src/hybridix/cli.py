@@ -96,6 +96,16 @@ def main(argv: list[str] | None = None) -> int:
             if answer.unverified_answer is not None:
                 print(f"\nUnverified answer:\n{answer.unverified_answer}")
 
+            if answer.retrieved_evidence:
+                print("\nRetrieved evidence:")
+
+                for rank, result in enumerate(answer.retrieved_evidence, start=1):
+                    metadata = result.chunk.metadata
+
+                    print(
+                        f"{rank}. {metadata.source}"
+                        f" | {metadata.heading or 'No heading'}"
+                    )
     return 0
 
 if __name__ == "__main__":
