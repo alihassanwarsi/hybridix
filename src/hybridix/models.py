@@ -41,3 +41,5 @@ class GeneratedAnswer:
     text: str
     citations: list[Citation]
     refused: bool = False
+    refusal_reason: str | None = None
+    verification_reason: str | None = None

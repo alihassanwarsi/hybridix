@@ -18,7 +18,6 @@ def make_answer() -> GeneratedAnswer:
         ]
     )
 
-
 def test_pipeline_returns_verified_answer(monkeypatch):
     answer = make_answer()
     results = [object()]
@@ -80,7 +79,8 @@ def test_pipeline_rejects_unverified_answer(monkeypatch):
 
     assert output.text == "I couldn't verify an answer from the available evidence."
     assert output.citations == []
-
+    assert output.refusal_reason == "verifier_rejection"
+    assert output.verification_reason == "The claim is unsupported."
 
 def test_pipeline_handles_no_evidence(monkeypatch):
     monkeypatch.setattr(
@@ -99,6 +99,7 @@ def test_pipeline_handles_no_evidence(monkeypatch):
 
     assert output.text == "I don't have enough evidence to answer."
     assert output.citations == []
+    assert output.refusal_reason == "no_results"
 
     generate.assert_not_called()
     verify.assert_not_called()
@@ -153,4 +154,5 @@ def test_pipeline_preserves_generator_refusal(monkeypatch):
 
     assert result is refusal
     assert result.refused is True
+    assert result.refusal_reason == "generator_refusal"
     verifier.assert_not_called()

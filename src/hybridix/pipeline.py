@@ -44,12 +44,14 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
         return GeneratedAnswer(
             text="I don't have enough evidence to answer.",
             citations=[],
-            refused=True
+            refused=True,
+            refusal_reason="no_results"
         )
 
     answer = generate_answer(query, results)
 
     if answer.refused:
+        answer.refusal_reason = "generator_refusal"
         return answer
 
     verification = verify_answer(answer)
@@ -58,7 +60,9 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
         return GeneratedAnswer(
             text="I couldn't verify an answer from the available evidence.",
             citations=[],
-            refused=True
+            refused=True,
+            refusal_reason="verifier_rejection",
+            verification_reason=verification.reason
         )
 
     return answer
