@@ -7,7 +7,7 @@ from hybridix.indexing.token_budget import fit_chunks_to_embedding_budget
 from hybridix.indexing.versioning.builder import build_index_version
 from hybridix.indexing.versioning.active import activate_index_version
 from hybridix.retrieval.reranker import reranked_search
-from hybridix.generation.generator import generate_answer
+from hybridix.generation.generator import generate_answer, InvalidGeneratedAnswerError
 from hybridix.generation.evidence_verifier import verify_answer
 
 def build_indexes(source_root: Path, *, version: str | None = None, index_root: Path | None = None,) -> int:
@@ -45,7 +45,17 @@ def answer_question(query: str, top_k: int = 5) -> GeneratedAnswer:
             refusal_reason="no_results"
         )
 
-    answer = generate_answer(query, results)
+    try:
+        answer = generate_answer(query, results)
+    except InvalidGeneratedAnswerError:
+        return GeneratedAnswer(
+            text="I couldn't produce a valid answer from the available evidence.",
+            citations=[],
+            refused=True,
+            refusal_reason="generator_invalid_output",
+            retrieved_evidence=results,
+        )
+
     answer.retrieved_evidence = results
 
     if answer.refused:

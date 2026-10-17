@@ -235,3 +235,30 @@ def test_failed_build_never_activates(tmp_path, monkeypatch):
         )
 
     activate.assert_not_called()
+
+def test_pipeline_handles_invalid_generated_answer(monkeypatch):
+    from hybridix.generation.generator import InvalidGeneratedAnswerError
+
+    results = [object()]
+    verifier = Mock()
+
+    monkeypatch.setattr(
+        pipeline, "reranked_search",
+        Mock(return_value=results)
+    )
+
+    monkeypatch.setattr(
+        pipeline, "generate_answer",
+        Mock(side_effect=InvalidGeneratedAnswerError("Invalid evidence"))
+    )
+
+    monkeypatch.setattr(pipeline, "verify_answer", verifier)
+
+    answer = pipeline.answer_question("Test question")
+
+    assert answer.refused is True
+    assert answer.citations == []
+    assert answer.refusal_reason == "generator_invalid_output"
+    assert answer.retrieved_evidence is results
+
+    verifier.assert_not_called()

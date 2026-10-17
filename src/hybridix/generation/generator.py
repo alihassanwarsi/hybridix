@@ -1,6 +1,6 @@
 import re
 from groq import Groq
-from pydantic import BaseModel, ConfigDict, StrictInt
+from pydantic import BaseModel, ConfigDict, StrictInt, ValidationError
 from hybridix.config import settings
 from hybridix.generation.citations import resolve_citations
 from hybridix.generation.context import build_context
@@ -8,6 +8,9 @@ from hybridix.generation.prompts import load_prompt
 from hybridix.models import GeneratedAnswer, RetrievalResult
 
 SYSTEM_PROMPT = load_prompt("answer_generation.txt")
+
+class InvalidGeneratedAnswerError(ValueError):
+    """Generated answer failed validation."""
 
 class AnswerClaim(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -60,9 +63,12 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
     answer = response.choices[0].message.content or ""
 
     if not answer:
-        raise ValueError("Empty generation response.")
+        raise InvalidGeneratedAnswerError("Empty generation response.")
 
-    structured = StructuredAnswer.model_validate_json(answer)
+    try:
+        structured = StructuredAnswer.model_validate_json(answer)
+    except ValidationError as exc:
+        raise InvalidGeneratedAnswerError("Invalid structured generation response.") from exc
 
     if not structured.claims:
         return GeneratedAnswer(
@@ -78,17 +84,17 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
         numbers = list(dict.fromkeys(claim.evidence_numbers))
 
         if not text:
-            raise ValueError("Generated claim cannot be empty.")
+            raise InvalidGeneratedAnswerError("Generated claim cannot be empty.")
 
         if re.search(r"\[\d+\]", text):
-            raise ValueError("Generated claim text must not contain citation markers.")
+            raise InvalidGeneratedAnswerError("Generated claim text must not contain citation markers.")
 
         if not numbers:
-            raise ValueError("Generated claim has no evidence.")
+            raise InvalidGeneratedAnswerError("Generated claim has no evidence.")
 
         for number in numbers:
             if number < 1 or number > len(results):
-                raise ValueError(f"Unknown evidence number: {number}")
+                raise InvalidGeneratedAnswerError(f"Unknown evidence number: {number}")
 
         citation_text = " ".join(f"[{number}]" for number in numbers)
 
