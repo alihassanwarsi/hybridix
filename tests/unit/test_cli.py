@@ -256,3 +256,34 @@ def test_ingest_dry_run_detects_both_formats(tmp_path, monkeypatch, capsys):
 
     output = capsys.readouterr().out
     assert "Found 2 supported document(s)." in output
+
+def test_ask_shows_clean_error(monkeypatch, capsys):
+    def fail(query, top_k):
+        raise FileNotFoundError("No usable index found.")
+
+    monkeypatch.setattr(pipeline, "answer_question", fail)
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["ask", "What is Python?"])
+
+    assert exc.value.code == 1
+
+    output = capsys.readouterr()
+    assert "error: No usable index found." in output.err
+    assert "Traceback" not in output.err
+
+def test_ingest_shows_clean_error(tmp_path, monkeypatch, capsys):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "guide.md").write_text("# Guide")
+
+    def fail(folder):
+        raise ValueError("Invalid YAML frontmatter")
+
+    monkeypatch.setattr(pipeline, "build_indexes", fail)
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["ingest", str(docs)])
+
+    assert exc.value.code == 1
+    assert "error: Invalid YAML frontmatter" in capsys.readouterr().err

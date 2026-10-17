@@ -89,7 +89,10 @@ def main(argv: list[str] | None = None) -> int:
 
         from hybridix.pipeline import build_indexes
 
-        chunk_count = build_indexes(args.folder)
+        try:
+            chunk_count = build_indexes(args.folder)
+        except (ValueError, FileNotFoundError) as exc:
+            parser.exit(1, f"error: {exc}\n")
 
         print(
             f"Successfully indexed {len(paths)} documents "
@@ -104,7 +107,10 @@ def main(argv: list[str] | None = None) -> int:
 
         from hybridix.evaluation.runner import run_retrieval_evaluation
 
-        run_retrieval_evaluation(path=args.dataset, k=args.top_k)
+        try:
+            run_retrieval_evaluation(path=args.dataset, k=args.top_k)
+        except (ValueError, FileNotFoundError) as exc:
+            parser.exit(1, f"error: {exc}\n")
 
     if args.command == "ask":
         if args.top_k < 1:
@@ -112,10 +118,13 @@ def main(argv: list[str] | None = None) -> int:
 
         from hybridix.pipeline import answer_question
 
-        answer = answer_question(
-            query=args.question,
-            top_k=args.top_k
-        )
+        try:
+            answer = answer_question(
+                query=args.question,
+                top_k=args.top_k
+            )
+        except (ValueError, FileNotFoundError) as exc:
+            parser.exit(1, f"error: {exc}\n")
 
         print(f"\nAnswer:\n{answer.text}")
 
