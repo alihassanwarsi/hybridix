@@ -90,3 +90,58 @@ def test_successful_indexing_order(monkeypatch):
 
     assert steps == ["embed", "reset", "upsert"]
     collection.upsert.assert_called_once()
+
+def test_get_client_uses_explicit_paths(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_client(path):
+        calls.append(path)
+        return object()
+
+    monkeypatch.setattr(
+        dense_indexer.chromadb,
+        "PersistentClient",
+        fake_client
+    )
+
+    dense_indexer._cached_client.cache_clear()
+
+    first_path = tmp_path / "version_001" / "dense"
+    second_path = tmp_path / "version_002" / "dense"
+
+    first = dense_indexer.get_client(first_path)
+    second = dense_indexer.get_client(second_path)
+    first_again = dense_indexer.get_client(first_path)
+
+    assert first is first_again
+    assert first is not second
+    assert calls == [
+        str(first_path.resolve()),
+        str(second_path.resolve())
+    ]
+
+    dense_indexer._cached_client.cache_clear()
+
+
+def test_get_collection_uses_selected_path(tmp_path, monkeypatch):
+    selected_path = tmp_path / "version_002" / "dense"
+
+    fake_client = object()
+    fake_collection = object()
+
+    def fake_get_client(index_path):
+        assert index_path == selected_path
+        return fake_client
+
+    monkeypatch.setattr(
+        dense_indexer, "get_client", fake_get_client
+    )
+
+    monkeypatch.setattr(
+        dense_indexer, "_get_or_create_collection",
+        lambda client: fake_collection
+    )
+
+    result = dense_indexer.get_collection(selected_path)
+
+    assert result is fake_collection

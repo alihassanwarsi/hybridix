@@ -1,14 +1,19 @@
 import chromadb
 from chromadb.errors import NotFoundError
+from pathlib import Path
 from functools import lru_cache
 from hybridix.config import settings
 from hybridix.indexing.embeddings import embed_texts
 from hybridix.indexing.search_text import build_search_text
 from hybridix.models import Chunk
 
-@lru_cache(maxsize=1)
-def get_client():
-    return chromadb.PersistentClient(path=str(settings.dense_index_path))
+@lru_cache(maxsize=8)
+def _cached_client(path: str):
+    return chromadb.PersistentClient(path=path)
+
+def get_client(index_path: Path | None = None):
+    path = index_path if index_path is not None else settings.dense_index_path
+    return _cached_client(str(path.resolve()))
 
 def _get_or_create_collection(client):
     return client.get_or_create_collection(
@@ -19,8 +24,13 @@ def _get_or_create_collection(client):
         }
     )
 
-def get_collection():
-    return _get_or_create_collection(get_client())
+def get_collection(index_path: Path | None = None):
+    if index_path is None:
+        client = get_client()
+    else:
+        client = get_client(index_path)
+
+    return _get_or_create_collection(client)
 
 def reset_collection():
     client = get_client()

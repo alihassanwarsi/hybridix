@@ -4,6 +4,7 @@ from hybridix.models import RetrievalResult
 from hybridix.config import settings
 from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.sparse_retriever import sparse_search
+from hybridix.indexing.index_versions import get_active_index_paths
 
 @lru_cache(maxsize=1)
 def get_reranker() -> CrossEncoder:
@@ -29,9 +30,11 @@ def rerank(query: str, results: list[RetrievalResult], top_k: int = 5) -> list[R
     return reranked[:top_k]
 
 def reranked_search(query: str, top_k: int = 5, candidate_k: int = 30) -> list[RetrievalResult]:
-    dense_results = dense_search(query, top_k=candidate_k)
+    dense_path, sparse_path = get_active_index_paths()
 
-    sparse_results = sparse_search(query, top_k=candidate_k)
+    dense_results = dense_search(query, top_k=candidate_k, index_path=dense_path)
+
+    sparse_results = sparse_search(query, top_k=candidate_k, index_path=sparse_path)
 
     candidates: dict[str, RetrievalResult] = {}
 

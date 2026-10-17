@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     chunk_size: int = Field(default=2000, gt=0)
     chunk_overlap: int = Field(default=200, ge=0)
 
+    index_root: Path = Path("data/indexes")
+
     dense_index_path: Path = Path("data/indexes/dense")
     sparse_index_path: Path = Path("data/indexes/sparse")
 

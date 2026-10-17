@@ -1,15 +1,20 @@
+from pathlib import Path
 from hybridix.config import settings
 from hybridix.indexing.dense_indexer import get_collection
 from hybridix.indexing.embeddings import embed_query
 from hybridix.models import Chunk, ChunkMetadata, RetrievalResult
 
-def dense_search(query: str, top_k: int | None = None) -> list[RetrievalResult]:
+def dense_search(query: str, top_k: int | None = None, *, index_path: Path | None = None)  -> list[RetrievalResult]:
     if not query.strip():
         raise ValueError("Query cannot be empty.")
 
     top_k = top_k or settings.dense_top_k
 
-    collection = get_collection()
+    if index_path is None:
+        collection = get_collection()
+    else:
+        collection = get_collection(index_path)
+
     query_embedding = embed_query(query)
 
     results = collection.query(

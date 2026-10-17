@@ -32,6 +32,18 @@ def test_sparse_search_handles_small_corpus(tmp_path, monkeypatch, chunk_count):
 
     assert len(results) == chunk_count
 
+    monkeypatch.setattr(
+    settings, "sparse_index_path", tmp_path / "missing"
+)
+
+    explicit_results = sparse_search(
+        "gateway sharding",
+        top_k=30,
+        index_path=tmp_path / "sparse"
+    )
+
+    assert len(explicit_results) == chunk_count
+
 def test_sparse_index_rejects_empty_corpus(tmp_path, monkeypatch):
     monkeypatch.setattr(
         settings,
