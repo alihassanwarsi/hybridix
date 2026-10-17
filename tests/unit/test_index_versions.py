@@ -2,6 +2,7 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import Mock
+from hybridix.config import settings
 from hybridix.indexing.versioning.active import read_active_version, resolve_index_paths, NoActiveIndexError
 
 def test_no_active_version(tmp_path):
@@ -108,7 +109,7 @@ def test_failed_validation_preserves_active_version(tmp_path, monkeypatch):
         index_versions,
         "validate_index_pair",
         Mock(side_effect=ValueError("Invalid indexes"))
-)
+    )
 
     with pytest.raises(ValueError, match="Invalid indexes"):
         index_versions.activate_index_version(
@@ -119,7 +120,6 @@ def test_failed_validation_preserves_active_version(tmp_path, monkeypatch):
 
     assert index_versions.read_active_version(tmp_path) == "version_001"
 
-
 def test_missing_indexes_raise_clear_error(tmp_path):
     dense = tmp_path / "missing_dense"
     sparse = tmp_path / "missing_sparse"
@@ -129,3 +129,33 @@ def test_missing_indexes_raise_clear_error(tmp_path):
 
     assert not dense.exists()
     assert not sparse.exists()
+
+def test_embedding_model_mismatch_is_rejected(tmp_path, monkeypatch):
+    version_root = tmp_path / "version_001"
+    dense = version_root / "dense"
+    sparse = version_root / "sparse"
+
+    dense.mkdir(parents=True)
+    sparse.mkdir()
+
+    (dense / "chroma.sqlite3").touch()
+    (sparse / "params.index.json").touch()
+
+    (tmp_path / "active.json").write_text(
+        json.dumps({"version": "version_001"}),
+        encoding="utf-8"
+    )
+
+    (version_root / "manifest.json").write_text(
+        json.dumps({"embedding_model": "model-a", "chunk_count": 1}),
+        encoding="utf-8"
+    )
+
+    monkeypatch.setattr(settings, "embedding_model", "model-b")
+
+    with pytest.raises(ValueError, match="Embedding model mismatch"):
+        resolve_index_paths(
+            tmp_path,
+            tmp_path / "unused-dense",
+            tmp_path / "unused-sparse"
+        )

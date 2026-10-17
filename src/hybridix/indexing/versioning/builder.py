@@ -1,4 +1,5 @@
 import re
+import json
 from pathlib import Path
 from hybridix.config import settings
 from hybridix.models import Chunk
@@ -26,4 +27,10 @@ def build_index_version(chunks: list[Chunk], version: str, *, index_root: Path |
 
     validate_index_pair(chunks, dense_path, sparse_path)
 
+    manifest = {
+    "embedding_model": settings.embedding_model,
+    "chunk_count": len(chunks)
+    }
+
+    (version_root / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return version_root

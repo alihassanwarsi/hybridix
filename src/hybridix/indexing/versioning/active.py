@@ -10,6 +10,29 @@ from hybridix.indexing.versioning.validator import validate_index_pair
 class NoActiveIndexError(FileNotFoundError):
     """No usable document index is available."""
 
+def _check_embedding_model(version_root: Path) -> None:
+    manifest_path = version_root / "manifest.json"
+
+    if not manifest_path.exists():
+        return
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    if not isinstance(manifest, dict):
+        raise ValueError("Invalid index manifest.")
+
+    model = manifest.get("embedding_model")
+
+    if not isinstance(model, str) or not model.strip():
+        raise ValueError("Invalid index manifest: missing embedding_model.")
+
+    if model != settings.embedding_model:
+        raise ValueError(
+            f"Embedding model mismatch: index uses '{model}', "
+            f"but configuration uses '{settings.embedding_model}'. "
+            "Restore the original model or re-ingest your documents."
+        )
+
 def read_active_version(index_root: Path) -> str | None:
     active_file = index_root / "active.json"
 
@@ -50,6 +73,8 @@ def resolve_index_paths(index_root: Path, fallback_dense: Path, fallback_sparse:
     if not (sparse_path / "params.index.json").is_file():
         raise FileNotFoundError(f"Active sparse index missing: {sparse_path}")
 
+    _check_embedding_model(version_root)
+
     return dense_path, sparse_path
 
 def get_active_index_paths() -> tuple[Path, Path]:
@@ -71,6 +96,8 @@ def activate_index_version(version: str, chunks: list[Chunk], *, index_root: Pat
 
     dense_path = version_root / "dense"
     sparse_path = version_root / "sparse"
+
+    _check_embedding_model(version_root)
 
     validate_index_pair(chunks, dense_path, sparse_path)
 

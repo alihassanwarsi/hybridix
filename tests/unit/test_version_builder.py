@@ -1,5 +1,7 @@
+import json
 import pytest
 from unittest.mock import Mock
+from hybridix.config import settings
 from hybridix.indexing.versioning import builder as version_builder
 
 def test_build_version_runs_in_correct_order(tmp_path, monkeypatch):
@@ -25,6 +27,11 @@ def test_build_version_runs_in_correct_order(tmp_path, monkeypatch):
     )
 
     assert result == tmp_path / "version_002"
+    manifest = json.loads(
+    (result / "manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["embedding_model"] == settings.embedding_model
+    assert manifest["chunk_count"] == 1
     assert steps == [
         ("dense", result / "dense"),
         ("sparse", result / "sparse"),
