@@ -1,16 +1,19 @@
 from hybridix.models import RetrievalResult
 from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.sparse_retriever import sparse_search
+from hybridix.indexing.index_versions import get_active_index_paths
 
 def rrf_score(rank: int, k: int = 60) -> float:
     if rank < 1:
         raise ValueError("Rank must be 1 or greater.")
     return 1 / (k + rank)
 
-def hybrid_search(query: str, top_k: int = 10, rrf_k: int = 60,) -> list[RetrievalResult]:
+def hybrid_search(query: str, top_k: int = 10, rrf_k: int = 60) -> list[RetrievalResult]:
 
-    dense_results = dense_search(query)
-    sparse_results = sparse_search(query)
+    dense_path, sparse_path = get_active_index_paths()
+
+    dense_results = dense_search(query, index_path=dense_path)
+    sparse_results = sparse_search(query, index_path=sparse_path)
 
     rrf_scores = {}
     chunks = {}

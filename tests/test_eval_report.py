@@ -19,7 +19,7 @@ def test_retrieval_report_is_saved(tmp_path, monkeypatch):
         score=0.9,
     )
 
-    def fake_search(query, top_k):
+    def fake_search(query, top_k, *, index_path=None):
         return [result]
 
     for name in (

@@ -10,6 +10,7 @@ from hybridix.retrieval.hybrid_retriever import hybrid_search
 from hybridix.retrieval.sparse_retriever import sparse_search
 from hybridix.retrieval.reranker import reranked_search
 from hybridix.evaluation.dataset_loader import load_eval_cases
+from hybridix.indexing.index_versions import get_active_index_paths
 
 Retriever = Callable[[str, int], list[RetrievalResult]]
 
@@ -65,12 +66,14 @@ def evaluate_retriever(cases: list[dict], retriever: Retriever, k: int = 5, show
 def run_retrieval_evaluation(path: Path, k: int = 5) -> None:
     cases = load_eval_cases(path)
 
+    dense_path, sparse_path = get_active_index_paths()
+
     retrievers = {
-        "dense": dense_search,
-        "sparse": sparse_search,
-        "hybrid": hybrid_search,
-        "reranked": reranked_search
-    }
+    "dense": lambda query, k: dense_search(query, top_k=k, index_path=dense_path),
+    "sparse": lambda query, k: sparse_search(query, top_k=k, index_path=sparse_path),
+    "hybrid": hybrid_search,
+    "reranked": reranked_search,
+}
 
     report = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -80,8 +83,8 @@ def run_retrieval_evaluation(path: Path, k: int = 5) -> None:
         "config": {
             "embedding_model": settings.embedding_model,
             "reranker_model": settings.reranker_model,
-            "dense_index_path": str(settings.dense_index_path),
-            "sparse_index_path": str(settings.sparse_index_path)
+            "dense_index_path": str(dense_path),
+            "sparse_index_path": str(sparse_path)
         },
         "retrievers": {}
     }

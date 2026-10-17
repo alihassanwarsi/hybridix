@@ -158,3 +158,82 @@ def test_pipeline_preserves_generator_refusal(monkeypatch):
     assert result.refused is True
     assert result.refusal_reason == "generator_refusal"
     verifier.assert_not_called()
+
+
+def test_build_indexes_builds_before_activation(tmp_path, monkeypatch):
+    source_root = tmp_path / "docs"
+    source_root.mkdir()
+    (source_root / "guide.mdx").write_text("# Hello")
+
+    index_root = tmp_path / "indexes"
+    chunks = [object()]
+    steps = []
+
+    monkeypatch.setattr(
+        pipeline, "load_mdx", lambda path, root: object()
+    )
+    monkeypatch.setattr(
+        pipeline, "chunk_by_headings", lambda document: chunks
+    )
+    monkeypatch.setattr(
+        pipeline, "fit_chunks_to_embedding_budget", lambda items: items
+    )
+
+    def fake_build(items, version, *, index_root):
+        steps.append(("build", version, index_root))
+
+    def fake_activate(version, items, *, index_root):
+        steps.append(("activate", version, index_root))
+
+    monkeypatch.setattr(pipeline, "build_index_version", fake_build)
+    monkeypatch.setattr(pipeline, "activate_index_version", fake_activate)
+
+    count = pipeline.build_indexes(
+        source_root,
+        version="version_test",
+        index_root=index_root,
+    )
+
+    assert count == 1
+    assert steps == [
+        ("build", "version_test", index_root),
+        ("activate", "version_test", index_root),
+    ]
+
+
+def test_failed_build_never_activates(tmp_path, monkeypatch):
+    source_root = tmp_path / "docs"
+    source_root.mkdir()
+    (source_root / "guide.mdx").write_text("# Hello")
+
+    monkeypatch.setattr(
+        pipeline, "load_mdx", lambda path, root: object()
+    )
+    monkeypatch.setattr(
+        pipeline, "chunk_by_headings", lambda document: [object()]
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "fit_chunks_to_embedding_budget",
+        lambda chunks: chunks
+    )
+
+    monkeypatch.setattr(
+        pipeline,
+        "build_index_version",
+        Mock(side_effect=RuntimeError("Index build failed"))
+    )
+
+    activate = Mock()
+    monkeypatch.setattr(
+        pipeline, "activate_index_version", activate
+    )
+
+    with pytest.raises(RuntimeError, match="Index build failed"):
+        pipeline.build_indexes(
+            source_root,
+            version="version_test",
+            index_root=tmp_path / "indexes"
+        )
+
+    activate.assert_not_called()
