@@ -63,3 +63,31 @@ def test_sparse_search_reports_missing_index(tmp_path, monkeypatch):
 
     with pytest.raises(FileNotFoundError, match="Sparse index not found"):
         sparse_search("gateway sharding", top_k=5)
+
+
+def test_sparse_builder_uses_isolated_path(tmp_path, monkeypatch):
+    old_path = tmp_path / "old_index"
+    new_path = tmp_path / "new_index"
+
+    monkeypatch.setattr(
+        settings, "sparse_index_path", old_path
+    )
+
+    chunk = Chunk(
+        content="Discord uses rate limit buckets.",
+        metadata=ChunkMetadata(
+            source="docs.mdx",
+            file_type="mdx",
+            chunk_id="test-1",
+            strategy="heading",
+            chunk_index=0
+        )
+    )
+
+    build_sparse_index([chunk], index_path=new_path)
+
+    assert (new_path / "params.index.json").exists()
+    assert not old_path.exists()
+
+    with pytest.raises(FileExistsError):
+        build_sparse_index([chunk], index_path=new_path)

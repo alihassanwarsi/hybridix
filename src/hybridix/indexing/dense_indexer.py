@@ -42,9 +42,12 @@ def reset_collection():
 
     return _get_or_create_collection(client)
 
-def build_dense_index(chunks: list[Chunk]) -> None:
+def build_dense_index(chunks: list[Chunk], *, index_path: Path | None = None) -> None:
     if not chunks:
         raise ValueError("No chunks provided for indexing.")
+
+    if index_path is not None and index_path.exists():
+        raise FileExistsError(f"Index destination already exists: {index_path}")
 
     search_texts = [build_search_text(chunk) for chunk in chunks]
 
@@ -73,7 +76,10 @@ def build_dense_index(chunks: list[Chunk]) -> None:
 
         metadatas.append(metadata)
 
-    collection = reset_collection()
+    if index_path is None:
+        collection = reset_collection()
+    else:
+        collection = get_collection(index_path)
 
     collection.upsert(
         ids=ids,

@@ -145,3 +145,39 @@ def test_get_collection_uses_selected_path(tmp_path, monkeypatch):
     result = dense_indexer.get_collection(selected_path)
 
     assert result is fake_collection
+
+def test_dense_builder_uses_isolated_path(tmp_path, monkeypatch):
+    new_path = tmp_path / "new" / "dense"
+
+    chunk = Chunk(
+        content="Discord rate limit documentation.",
+        metadata=ChunkMetadata(
+            source="docs.mdx",
+            file_type="mdx",
+            chunk_id="test-chunk",
+            strategy="heading",
+            chunk_index=0
+        )
+    )
+
+    embeddings = Mock()
+    embeddings.tolist.return_value = [[0.1, 0.2]]
+
+    collection = Mock()
+    get_collection = Mock(return_value=collection)
+    reset = Mock()
+
+    monkeypatch.setattr(
+        dense_indexer, "embed_texts", Mock(return_value=embeddings)
+    )
+    monkeypatch.setattr(dense_indexer, "get_collection", get_collection)
+    monkeypatch.setattr(dense_indexer, "reset_collection", reset)
+
+    dense_indexer.build_dense_index(
+        [chunk],
+        index_path=new_path
+    )
+
+    get_collection.assert_called_once_with(new_path)
+    collection.upsert.assert_called_once()
+    reset.assert_not_called()

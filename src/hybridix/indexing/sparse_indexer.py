@@ -1,12 +1,16 @@
 import bm25s
 from bm25s.tokenization import Tokenizer
+from pathlib import Path
 from hybridix.config import settings
 from hybridix.models import Chunk
 from hybridix.indexing.search_text import build_search_text
 
-def build_sparse_index(chunks: list[Chunk]) -> None:
+def build_sparse_index(chunks: list[Chunk], *, index_path: Path | None = None) -> None:
     if not chunks:
         raise ValueError("No chunks provided for indexing.")
+
+    if index_path is not None and index_path.exists():
+        raise FileExistsError(f"Index destination already exists: {index_path}")
 
     corpus = [
     {
@@ -30,10 +34,11 @@ def build_sparse_index(chunks: list[Chunk]) -> None:
     retriever = bm25s.BM25(corpus=corpus)
     retriever.index(corpus_tokens)
 
-    index_path = settings.sparse_index_path
-    index_path.mkdir(parents=True, exist_ok=True)
+    target = index_path if index_path is not None else settings.sparse_index_path
 
-    retriever.save(str(index_path))
+    target.mkdir(parents=True, exist_ok=True)
 
-    tokenizer.save_vocab(str(index_path))
-    tokenizer.save_stopwords(str(index_path))
+    retriever.save(str(target))
+
+    tokenizer.save_vocab(str(target))
+    tokenizer.save_stopwords(str(target))
