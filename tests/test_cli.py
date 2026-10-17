@@ -1,5 +1,6 @@
-from pathlib import Path
 import pytest
+from unittest.mock import Mock
+from pathlib import Path
 from hybridix import cli, pipeline
 from hybridix.evaluation import runner
 from hybridix.models import Citation, GeneratedAnswer, Chunk, ChunkMetadata, RetrievalResult
@@ -180,3 +181,58 @@ def test_debug_shows_retrieved_evidence(monkeypatch, capsys):
     assert "Retrieved evidence:" in output
     assert "topics/rate-limits.mdx" in output
     assert "Rate Limit Header Examples" in output
+
+def test_ingest_command(tmp_path, monkeypatch, capsys):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+
+    (docs / "guide.mdx").write_text(
+        "# Test documentation",
+        encoding="utf-8"
+    )
+
+    build = Mock(return_value=3)
+    monkeypatch.setattr(pipeline, "build_indexes", build)
+
+    result = cli.main(["ingest", str(docs)])
+
+    assert result == 0
+    build.assert_called_once_with(docs)
+
+    output = capsys.readouterr().out
+    assert "Successfully indexed" in output
+    assert "3 chunks" in output
+
+def test_ingest_dry_run_does_not_build(tmp_path, monkeypatch, capsys):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+
+    (docs / "guide.mdx").write_text(
+        "# Test documentation",
+        encoding="utf-8"
+    )
+
+    build = Mock()
+    monkeypatch.setattr(pipeline, "build_indexes", build)
+
+    result = cli.main([
+        "ingest",
+        str(docs),
+        "--dry-run"
+    ])
+
+    assert result == 0
+    build.assert_not_called()
+
+    output = capsys.readouterr().out
+    assert "Found 1 MDX files" in output
+    assert "No indexes were modified" in output
+
+def test_ingest_rejects_missing_folder(tmp_path):
+    with pytest.raises(SystemExit) as exc:
+        cli.main([
+            "ingest",
+            str(tmp_path / "missing")
+        ])
+
+    assert exc.value.code == 2

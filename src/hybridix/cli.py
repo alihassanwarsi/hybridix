@@ -53,7 +53,49 @@ def main(argv: list[str] | None = None) -> int:
         help="Show additional debugging information"
     )
 
+    ingest_parser = commands.add_parser(
+    "ingest",
+    help="Build searchable indexes from documents",
+    )
+
+    ingest_parser.add_argument(
+        "folder",
+        type=Path,
+        help="Folder containing documents",
+    )
+
+    ingest_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Check documents without building indexes",
+    )
+
     args = parser.parse_args(argv)
+
+    if args.command == "ingest":
+        if not args.folder.is_dir():
+            parser.error(f"Not a valid directory: {args.folder}")
+
+        paths = sorted(args.folder.rglob("*.mdx"))
+
+        if not paths:
+            parser.error(f"No MDX files found in {args.folder}")
+
+        if args.dry_run:
+            print(f"Found {len(paths)} MDX files.")
+            print("Dry run complete. No indexes were modified.")
+            return 0
+
+        from hybridix.pipeline import build_indexes
+
+        chunk_count = build_indexes(args.folder)
+
+        print(
+            f"Successfully indexed {len(paths)} documents "
+            f"into {chunk_count} chunks."
+        )
+
+        return 0
 
     if args.command == "evaluate":
         if args.top_k < 1:
