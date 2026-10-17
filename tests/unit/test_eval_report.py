@@ -1,4 +1,3 @@
-
 import json
 from hybridix.evaluation import runner
 from hybridix.models import Chunk, ChunkMetadata, RetrievalResult
@@ -16,7 +15,7 @@ def test_retrieval_report_is_saved(tmp_path, monkeypatch):
                 heading="Example"
             )
         ),
-        score=0.9,
+        score=0.9
     )
 
     def fake_search(query, top_k, *, index_path=None):
@@ -52,6 +51,16 @@ def test_retrieval_report_is_saved(tmp_path, monkeypatch):
     )
 
     monkeypatch.chdir(tmp_path)
+
+    monkeypatch.setattr(
+        runner,
+        "get_active_index_paths",
+        lambda: (
+            tmp_path / "dense",
+            tmp_path / "sparse"
+        )
+    )
+
     runner.run_retrieval_evaluation(dataset, k=5)
 
     reports = list((tmp_path / "data/eval/reports").glob("retrieval_*.json"))

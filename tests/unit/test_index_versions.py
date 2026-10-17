@@ -2,7 +2,7 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import Mock
-from hybridix.indexing.versioning.active import read_active_version, resolve_index_paths
+from hybridix.indexing.versioning.active import read_active_version, resolve_index_paths, NoActiveIndexError
 
 def test_no_active_version(tmp_path):
     result = read_active_version(tmp_path)
@@ -33,8 +33,13 @@ def test_invalid_active_version(tmp_path):
         read_active_version(tmp_path)
 
 def test_resolve_paths_without_active_version(tmp_path):
-    dense = Path("existing/dense")
-    sparse = Path("existing/sparse")
+    dense = tmp_path / "legacy_dense"
+    sparse = tmp_path / "legacy_sparse"
+
+    dense.mkdir()
+    sparse.mkdir()
+    (dense / "chroma.sqlite3").touch()
+    (sparse / "params.index.json").touch()
 
     result = resolve_index_paths(tmp_path, dense, sparse)
 
@@ -113,3 +118,14 @@ def test_failed_validation_preserves_active_version(tmp_path, monkeypatch):
         )
 
     assert index_versions.read_active_version(tmp_path) == "version_001"
+
+
+def test_missing_indexes_raise_clear_error(tmp_path):
+    dense = tmp_path / "missing_dense"
+    sparse = tmp_path / "missing_sparse"
+
+    with pytest.raises(NoActiveIndexError, match="No usable index found"):
+        resolve_index_paths(tmp_path, dense, sparse)
+
+    assert not dense.exists()
+    assert not sparse.exists()

@@ -7,6 +7,9 @@ from hybridix.config import settings
 from hybridix.models import Chunk
 from hybridix.indexing.versioning.validator import validate_index_pair
 
+class NoActiveIndexError(FileNotFoundError):
+    """No usable document index is available."""
+
 def read_active_version(index_root: Path) -> str | None:
     active_file = index_root / "active.json"
 
@@ -29,6 +32,12 @@ def resolve_index_paths(index_root: Path, fallback_dense: Path, fallback_sparse:
     version = read_active_version(index_root)
 
     if version is None:
+        dense_exists = (fallback_dense / "chroma.sqlite3").is_file()
+        sparse_exists = (fallback_sparse / "params.index.json").is_file()
+
+        if not (dense_exists and sparse_exists):
+            raise NoActiveIndexError("No usable index found. Run 'hybridix ingest <folder>' first.")
+
         return fallback_dense, fallback_sparse
 
     version_root = index_root / version
