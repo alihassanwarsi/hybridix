@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from hybridix.ingestion.loader import discover_documents
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -76,13 +77,13 @@ def main(argv: list[str] | None = None) -> int:
         if not args.folder.is_dir():
             parser.error(f"Not a valid directory: {args.folder}")
 
-        paths = sorted(args.folder.rglob("*.mdx"))
+        paths = discover_documents(args.folder)
 
         if not paths:
-            parser.error(f"No MDX files found in {args.folder}")
+            parser.error(f"No Markdown or MDX files found in {args.folder}")
 
         if args.dry_run:
-            print(f"Found {len(paths)} MDX files.")
+            print(f"Found {len(paths)} supported document(s).")
             print("Dry run complete. No indexes were modified.")
             return 0
 

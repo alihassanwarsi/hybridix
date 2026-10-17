@@ -225,7 +225,7 @@ def test_ingest_dry_run_does_not_build(tmp_path, monkeypatch, capsys):
     build.assert_not_called()
 
     output = capsys.readouterr().out
-    assert "Found 1 MDX files" in output
+    assert "Found 1 supported document(s)." in output
     assert "No indexes were modified" in output
 
 def test_ingest_rejects_missing_folder(tmp_path):
@@ -236,3 +236,23 @@ def test_ingest_rejects_missing_folder(tmp_path):
         ])
 
     assert exc.value.code == 2
+
+def test_ingest_dry_run_detects_both_formats(tmp_path, monkeypatch, capsys):
+    from unittest.mock import Mock
+
+    docs = tmp_path / "docs"
+    docs.mkdir()
+
+    (docs / "guide.md").write_text("# Markdown")
+    (docs / "guide.mdx").write_text("# MDX")
+
+    build = Mock()
+    monkeypatch.setattr(pipeline, "build_indexes", build)
+
+    result = cli.main(["ingest", str(docs), "--dry-run"])
+
+    assert result == 0
+    build.assert_not_called()
+
+    output = capsys.readouterr().out
+    assert "Found 2 supported document(s)." in output

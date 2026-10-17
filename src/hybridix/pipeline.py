@@ -2,7 +2,7 @@ from uuid import uuid4
 from pathlib import Path
 from hybridix.config import settings
 from hybridix.models import GeneratedAnswer
-from hybridix.ingestion.loader import load_mdx
+from hybridix.ingestion.loader import load_mdx, load_markdown, discover_documents
 from hybridix.ingestion.chunking import chunk_by_headings
 from hybridix.indexing.token_budget import fit_chunks_to_embedding_budget
 from hybridix.indexing.version_builder import build_index_version
@@ -12,15 +12,19 @@ from hybridix.generation.generator import generate_answer
 from hybridix.generation.evidence_verifier import verify_answer
 
 def build_indexes(source_root: Path, *, version: str | None = None, index_root: Path | None = None,) -> int:
-    paths = sorted(source_root.rglob("*.mdx"))
+    paths = discover_documents(source_root)
 
     if not paths:
-        raise ValueError(f"No MDX files found in {source_root}")
+        raise ValueError(f"No Markdown or MDX files found in {source_root}")
 
     chunks = []
 
     for path in paths:
-        document = load_mdx(path, source_root)
+        if path.suffix.lower() == ".md":
+            document = load_markdown(path, source_root)
+        else:
+            document = load_mdx(path, source_root)
+
         chunks.extend(chunk_by_headings(document))
 
     if not chunks:

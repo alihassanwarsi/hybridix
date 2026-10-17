@@ -4,6 +4,13 @@ from pathlib import Path
 from typing import Any
 from hybridix.models import Document, DocumentMetadata
 
+def discover_documents(source_root: Path) -> list[Path]:
+    return sorted(
+        path
+        for path in source_root.rglob("*")
+        if path.is_file() and path.suffix.lower() in {".md", ".mdx"}
+    )
+
 def _parse_frontmatter(raw_text: str) -> tuple[dict[str, Any], str]:
     if not raw_text.startswith("---"):
         return {}, raw_text
@@ -75,6 +82,24 @@ def load_mdx(path: Path, source_root: Path) -> Document:
         metadata=DocumentMetadata(
             source=source,
             file_type="mdx",
+            title=metadata.get("title")
+        )
+    )
+
+def load_markdown(path: Path, source_root: Path) -> Document:
+    if path.suffix.lower() != ".md":
+        raise ValueError("Expected a Markdown (.md) file.")
+
+    text = path.read_text(encoding="utf-8")
+    metadata, body = _parse_frontmatter(text)
+
+    source = path.resolve().relative_to(source_root.resolve()).as_posix()
+
+    return Document(
+        content=body.strip(),
+        metadata=DocumentMetadata(
+            source=source,
+            file_type="md",
             title=metadata.get("title")
         )
     )

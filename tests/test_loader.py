@@ -1,4 +1,4 @@
-from hybridix.ingestion.loader import load_mdx
+from hybridix.ingestion.loader import load_mdx, load_markdown
 
 def test_load_mdx_parses_title(tmp_path):
     path = tmp_path / "test.mdx"
@@ -38,3 +38,25 @@ import requests
 
     assert 'import Component from "./Component"' not in document.content
     assert "import requests" in document.content
+
+def test_load_markdown_preserves_content(tmp_path):
+    path = tmp_path / "guide.md"
+
+    path.write_text(
+        "---\n"
+        "title: Python Guide\n"
+        "---\n"
+        "# Python Guide\n\n"
+        "```python\n"
+        "import os\n"
+        "```\n",
+        encoding="utf-8"
+    )
+
+    document = load_markdown(path, tmp_path)
+
+    assert document.metadata.source == "guide.md"
+    assert document.metadata.file_type == "md"
+    assert document.metadata.title == "Python Guide"
+    assert "# Python Guide" in document.content
+    assert "import os" in document.content
