@@ -2,7 +2,7 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import Mock
-from hybridix.indexing.index_versions import read_active_version, resolve_index_paths
+from hybridix.indexing.versioning.active import read_active_version, resolve_index_paths
 
 def test_no_active_version(tmp_path):
     result = read_active_version(tmp_path)
@@ -66,7 +66,7 @@ def test_resolve_paths_with_active_version(tmp_path):
     assert result == (dense_path, sparse_path)
 
 def test_activation_switches_active_version(tmp_path, monkeypatch):
-    from hybridix.indexing import index_versions
+    from hybridix.indexing.versioning import active as index_versions
 
     (tmp_path / "version_002").mkdir()
 
@@ -92,7 +92,7 @@ def test_activation_switches_active_version(tmp_path, monkeypatch):
     )
 
 def test_failed_validation_preserves_active_version(tmp_path, monkeypatch):
-    from hybridix.indexing import index_versions
+    from hybridix.indexing.versioning import active as index_versions
 
     (tmp_path / "version_002").mkdir()
 

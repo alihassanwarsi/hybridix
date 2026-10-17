@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from hybridix.indexing import version_builder
+from hybridix.indexing.versioning import builder as version_builder
 
 def test_build_version_runs_in_correct_order(tmp_path, monkeypatch):
     steps = []

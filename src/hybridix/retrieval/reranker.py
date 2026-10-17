@@ -4,7 +4,7 @@ from hybridix.models import RetrievalResult
 from hybridix.config import settings
 from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.sparse_retriever import sparse_search
-from hybridix.indexing.index_versions import get_active_index_paths
+from hybridix.indexing.versioning.active import get_active_index_paths
 
 @lru_cache(maxsize=1)
 def get_reranker() -> CrossEncoder:

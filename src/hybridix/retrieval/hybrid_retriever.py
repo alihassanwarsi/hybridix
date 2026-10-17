@@ -1,7 +1,7 @@
 from hybridix.models import RetrievalResult
 from hybridix.retrieval.dense_retriever import dense_search
 from hybridix.retrieval.sparse_retriever import sparse_search
-from hybridix.indexing.index_versions import get_active_index_paths
+from hybridix.indexing.versioning.active import get_active_index_paths
 
 def rrf_score(rank: int, k: int = 60) -> float:
     if rank < 1:

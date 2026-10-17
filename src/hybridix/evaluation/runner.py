@@ -10,7 +10,7 @@ from hybridix.retrieval.hybrid_retriever import hybrid_search
 from hybridix.retrieval.sparse_retriever import sparse_search
 from hybridix.retrieval.reranker import reranked_search
 from hybridix.evaluation.dataset_loader import load_eval_cases
-from hybridix.indexing.index_versions import get_active_index_paths
+from hybridix.indexing.versioning.active import get_active_index_paths
 
 Retriever = Callable[[str, int], list[RetrievalResult]]
 

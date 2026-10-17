@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from hybridix.config import settings
 from hybridix.models import Chunk
-from hybridix.indexing.validator import validate_index_pair
+from hybridix.indexing.versioning.validator import validate_index_pair
 
 def read_active_version(index_root: Path) -> str | None:
     active_file = index_root / "active.json"

@@ -4,7 +4,7 @@ from hybridix.config import settings
 from hybridix.models import Chunk
 from hybridix.indexing.dense_indexer import build_dense_index
 from hybridix.indexing.sparse_indexer import build_sparse_index
-from hybridix.indexing.validator import validate_index_pair
+from hybridix.indexing.versioning.validator import validate_index_pair
 
 def build_index_version(chunks: list[Chunk], version: str, *, index_root: Path | None = None,) -> Path:
     if not chunks:

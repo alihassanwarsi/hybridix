@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from hybridix.models import Chunk, ChunkMetadata
 from hybridix.indexing import dense_indexer, sparse_indexer
-from hybridix.indexing.validator import validate_index_pair
+from hybridix.indexing.versioning.validator import validate_index_pair
 
 def test_validate_index_pair(tmp_path, monkeypatch):
     dense_path = tmp_path / "new_version" / "dense"

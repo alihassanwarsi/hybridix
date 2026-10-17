@@ -5,8 +5,8 @@ from hybridix.models import GeneratedAnswer
 from hybridix.ingestion.loader import load_mdx, load_markdown, discover_documents
 from hybridix.ingestion.chunking import chunk_by_headings
 from hybridix.indexing.token_budget import fit_chunks_to_embedding_budget
-from hybridix.indexing.version_builder import build_index_version
-from hybridix.indexing.index_versions import activate_index_version
+from hybridix.indexing.versioning.builder import build_index_version
+from hybridix.indexing.versioning.active import activate_index_version
 from hybridix.retrieval.reranker import reranked_search
 from hybridix.generation.generator import generate_answer
 from hybridix.generation.evidence_verifier import verify_answer

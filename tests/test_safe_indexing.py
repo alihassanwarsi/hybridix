@@ -3,8 +3,9 @@ import pytest
 from unittest.mock import Mock
 from hybridix.config import settings
 from hybridix.models import Chunk, ChunkMetadata
-from hybridix.indexing import dense_indexer, version_builder
-from hybridix.indexing.index_versions import activate_index_version, get_active_index_paths, read_active_version
+from hybridix.indexing import dense_indexer
+from hybridix.indexing.versioning import builder as version_builder
+from hybridix.indexing.versioning.active import activate_index_version, get_active_index_paths, read_active_version
 from hybridix.retrieval import dense_retriever
 from hybridix.retrieval.sparse_retriever import sparse_search
 
@@ -108,7 +109,7 @@ def test_safe_index_replacement(tmp_path, monkeypatch):
     assert get_active_index_paths() == (new_dense, new_sparse)
 
 def test_failed_pointer_replacement_preserves_active_version(tmp_path, monkeypatch):
-    from hybridix.indexing import index_versions
+    from hybridix.indexing.versioning import active as index_versions
 
     root = tmp_path / "indexes"
     (root / "version_002").mkdir(parents=True)
