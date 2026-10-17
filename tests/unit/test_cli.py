@@ -37,9 +37,20 @@ def test_evaluate_command(monkeypatch):
 
 def test_evaluate_rejects_invalid_top_k():
     with pytest.raises(SystemExit) as exc:
-        cli.main(["evaluate", "--top-k", "0"])
+        cli.main([
+            "evaluate",
+            "--dataset", "test.jsonl",
+            "--top-k", "0",
+        ])
 
     assert exc.value.code == 2
+
+def test_evaluate_requires_dataset(capsys):
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["evaluate"])
+
+    assert exc.value.code == 2
+    assert "--dataset" in capsys.readouterr().err
 
 def test_ask_command(monkeypatch, capsys):
     calls = []

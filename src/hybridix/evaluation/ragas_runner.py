@@ -42,12 +42,12 @@ def calculate_score(metric, **inputs):
     except Exception as exc:
         return None, f"{type(exc).__name__}: {exc}"
 
-def run_ragas_evaluation(report_path: Path) -> None:
+def run_ragas_evaluation(report_path: Path, golden_dataset_path: Path) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
 
     golden = {
         case["id"]: case
-        for case in load_eval_cases(Path("data/eval/golden_dataset.jsonl"))
+        for case in load_eval_cases(golden_dataset_path)
     }
 
     if settings.openai_api_key is None:

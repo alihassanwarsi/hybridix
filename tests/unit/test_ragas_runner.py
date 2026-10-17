@@ -76,7 +76,7 @@ def test_refusals_and_invalid_citations(tmp_path, monkeypatch):
     report_path = tmp_path / "answers.json"
     report_path.write_text(json.dumps({"results": answers}))
 
-    ragas_runner.run_ragas_evaluation(report_path)
+    ragas_runner.run_ragas_evaluation(report_path, tmp_path / "golden.jsonl")
 
     saved_files = list(tmp_path.glob("ragas_results_*.json"))
     assert len(saved_files) == 1

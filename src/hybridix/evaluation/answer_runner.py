@@ -5,12 +5,11 @@ from hybridix.config import settings
 from hybridix.evaluation.dataset_loader import load_eval_cases
 from hybridix.pipeline import answer_question
 
-def run_answer_evaluation(limit: int = 3):
+def run_answer_evaluation(dataset_path: Path, limit: int = 3):
     if limit < 1:
         raise ValueError("limit must be positive.")
 
-    path = Path("data/eval/golden_dataset.jsonl")
-    cases = load_eval_cases(path)
+    cases = load_eval_cases(dataset_path)
 
     selected_cases = cases[:limit]
 
@@ -76,7 +75,7 @@ def run_answer_evaluation(limit: int = 3):
 
     report = {
         "timestamp": timestamp,
-        "dataset": str(path),
+        "dataset": str(dataset_path),
         "generation_model": settings.generation_model,
         "total_questions": len(cases),
         "evaluated_questions": len(records),

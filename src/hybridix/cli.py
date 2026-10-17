@@ -21,7 +21,8 @@ def main(argv: list[str] | None = None) -> int:
     evaluate_parser.add_argument(
         "--dataset",
         type=Path,
-        default=Path("data/eval/retrieval.jsonl")
+        required=True,
+        help="Path to the retrieval evaluation JSONL dataset"
     )
 
     evaluate_parser.add_argument(
