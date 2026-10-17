@@ -170,10 +170,9 @@ def test_build_indexes_builds_before_activation(tmp_path, monkeypatch):
     steps = []
 
     monkeypatch.setattr(
-        pipeline, "load_mdx", lambda path, root: object()
-    )
-    monkeypatch.setattr(
-        pipeline, "chunk_by_headings", lambda document: chunks
+        pipeline,
+        "prepare_chunks",
+        lambda root: chunks
     )
     monkeypatch.setattr(
         pipeline, "fit_chunks_to_embedding_budget", lambda items: items
@@ -207,10 +206,9 @@ def test_failed_build_never_activates(tmp_path, monkeypatch):
     (source_root / "guide.mdx").write_text("# Hello")
 
     monkeypatch.setattr(
-        pipeline, "load_mdx", lambda path, root: object()
-    )
-    monkeypatch.setattr(
-        pipeline, "chunk_by_headings", lambda document: [object()]
+        pipeline,
+        "prepare_chunks",
+        lambda root: [object()]
     )
     monkeypatch.setattr(
         pipeline,
