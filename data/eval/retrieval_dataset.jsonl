@@ -1,0 +1,50 @@
+{"query": "After Discord returns a 429 rate limit response, what should an app use to determine when to retry?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Exceeding A Rate Limit"}]}
+{"query": "What is Discord's global API request limit for bots?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Global Rate Limit"}]}
+{"query": "Which HTTP response statuses count toward Discord's invalid request limit?", "relevant": [{"source": "topics/rate-limits.mdx", "heading": "Invalid Request Limit aka Cloudflare bans"}]}
+{"query": "Where can I find the list of OAuth2 scopes supported by Discord?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "OAuth2 Scopes"}]}
+{"query": "How does Discord's OAuth2 authorization code grant work without exposing the user's credentials to the client?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "Authorization Code Grant"}]}
+{"query": "How are Discord bot accounts different from normal user accounts?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "Bot vs User Accounts"}]}
+{"query": "How does Discord's role hierarchy restrict what roles or users a bot can manage?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Permission Hierarchy"}]}
+{"query": "How are conflicting channel permission overwrites resolved for a Discord user?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Permission Overwrites"}]}
+{"query": "Which permission is required to send messages in threads instead of inheriting SEND_MESSAGES?", "relevant": [{"source": "topics/permissions.mdx", "heading": "Inherited Permissions (Threads)"}, {"source": "topics/threads.mdx", "heading": "Permissions"}]}
+{"query": "Which Discord endpoint should an app call to get the WebSocket URL before connecting to the Gateway?", "relevant": [{"source": "events/gateway.mdx", "heading": "Connecting"}, {"source": "events/gateway.mdx", "heading": "Get Gateway"}, {"source": "events/gateway.mdx", "heading": "Get Gateway Bot"}]}
+{"query": "How should an app keep a Discord Gateway connection alive after connecting?", "relevant": [{"source": "events/gateway.mdx", "heading": "Sending Heartbeats"}, {"source": "events/gateway-events.mdx", "heading": "Heartbeat"}]}
+{"query": "How should a Discord client decide whether to resume or re-identify after a Gateway disconnect?", "relevant": [{"source": "events/gateway.mdx", "heading": "Handling a Disconnect"}]}
+{"query": "How is a Discord Gateway shard ID calculated from a guild ID?", "relevant": [{"source": "events/gateway.mdx", "heading": "Sharding Formula"}]}
+{"query": "Which Gateway payload is used to perform the initial handshake with Discord?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Identify"}, {"source": "events/gateway.mdx", "heading": "Identifying"}]}
+{"query": "What information is required to resume a disconnected Discord Gateway session?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Resume"}, {"source": "events/gateway.mdx", "heading": "Preparing to Resume"}]}
+{"query": "How can a Gateway client request guild members that were not initially sent?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Request Guild Members"}]}
+{"query": "How should an interactions endpoint respond when Discord sends a PING request?", "relevant": [{"source": "interactions/overview.mdx", "heading": "Acknowledging PING requests"}]}
+{"query": "Which request headers must be validated when receiving Discord interactions over HTTP?", "relevant": [{"source": "interactions/overview.mdx", "heading": "Validating Security Request Headers"}]}
+{"query": "What are the supported ways for an app to respond to a Discord interaction?", "relevant": [{"source": "interactions/receiving-and-responding.mdx", "heading": "Interaction Callback Type"}]}
+{"query": "How can an app edit its original interaction response or send followup messages?", "relevant": [{"source": "interactions/receiving-and-responding.mdx", "heading": "Followup Messages"}]}
+{"query": "Where are global application commands available and how are updates handled?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Making a Global Command"}]}
+{"query": "Why are guild application commands useful for quick testing?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Making a Guild Command"}]}
+{"query": "How does Discord indicate which application command option the user is currently typing for autocomplete?", "relevant": [{"source": "interactions/application-commands.mdx", "heading": "Autocomplete"}]}
+{"query": "Why are Discord snowflake IDs returned as strings in the HTTP API?", "relevant": [{"source": "reference.mdx", "heading": "Snowflakes"}]}
+{"query": "What are the two supported ways to authenticate with the Discord API?", "relevant": [{"source": "reference.mdx", "heading": "Authentication"}]}
+{"query": "How can a Discord CDN image URL be changed to request a different image format or size?", "relevant": [{"source": "reference.mdx", "heading": "Image Formatting"}]}
+{"query": "What content must be provided when executing a Discord webhook, and how can the wait parameter affect the response?", "relevant": [{"source": "resources/webhook.mdx", "heading": "Execute Webhook"}]}
+{"query": "How does allowed_mentions control whether users receive notifications from mentions in a Discord message?", "relevant": [{"source": "resources/message.mdx", "heading": "Allowed Mentions Object"}]}
+{"query": "What permission and message-count constraints apply when bulk deleting Discord messages?", "relevant": [{"source": "resources/message.mdx", "heading": "Bulk Delete Messages"}]}
+{"query": "What permission is required to retrieve a guild audit log, and how are entries ordered with before or after?", "relevant": [{"source": "resources/audit-log.mdx", "heading": "Get Guild Audit Log"}]}
+{"query": "How should a webhook events endpoint acknowledge Discord's PING during URL validation?", "relevant": [{"source": "events/webhook-events.mdx", "heading": "Acknowledging PING requests"}]}
+{"query": "Which Discord Gateway intents are privileged and require special access?", "relevant": [{"source": "events/gateway.mdx", "heading": "Privileged Intents"}, {"source": "gateway/you-might-not-need-a-privileged-intent.mdx", "heading": "The Three Privileged Intents"}, {"source": "gateway/getting-started-with-privileged-intent-review.mdx", "heading": "What are Privileged Intents?"}]}
+{"query": "What information does the MESSAGE_CONTENT privileged intent let an app receive?", "relevant": [{"source": "events/gateway.mdx", "heading": "Message Content Intent"}, {"source": "gateway/you-might-not-need-a-privileged-intent.mdx", "heading": "The Three Privileged Intents"}, {"source": "gateway/getting-started-with-privileged-intent-review.mdx", "heading": "What are Privileged Intents?"}]}
+{"query": "How does an application display a modal in response to a Discord interaction?", "relevant": [{"source": "components/using-modal-components.mdx", "heading": "Displaying a Modal"}]}
+{"query": "What restrictions apply to users without MANAGE_THREADS in a locked thread?", "relevant": [{"source": "topics/threads.mdx", "heading": "Locked Threads"}]}
+{"query": "What happens when an application ends a poll, and can it end someone else's poll?", "relevant": [{"source": "resources/poll.mdx", "heading": "End Poll"}]}
+{"query": "Which permission is required to create a Discord Auto Moderation rule?", "relevant": [{"source": "resources/auto-moderation.mdx", "heading": "Create Auto Moderation Rule"}, {"source": "resources/auto-moderation.mdx", "heading": "Auto Moderation Permission Requirements"}]}
+{"query": "What type of thread is created from a message in a text channel versus an announcement channel?", "relevant": [{"source": "resources/channel.mdx", "heading": "Start Thread from Message"}]}
+{"query": "Why should Discord clients avoid caching voice server connection information from the Gateway?", "relevant": [{"source": "topics/voice-connections.mdx", "heading": "Retrieving Voice Server Information"}]}
+{"query": "How does an API client select a particular version of the Discord HTTP API?", "relevant": [{"source": "reference.mdx", "heading": "API Versioning"}]}
+{"query": "Which endpoint opens a DM with a user, and what happens if that DM already exists?", "relevant": [{"source": "resources/user.mdx", "heading": "Create DM"}]}
+{"query": "Which roles can members of a Discord developer team have?", "relevant": [{"source": "topics/teams.mdx", "heading": "Team Member Roles"}]}
+{"query": "Can a webhook be retrieved using its token without a separate authentication header?", "relevant": [{"source": "resources/webhook.mdx", "heading": "Get Webhook with Token"}]}
+{"query": "Which Gateway send event lets a Discord client update its presence or status?", "relevant": [{"source": "events/gateway-events.mdx", "heading": "Update Presence"}]}
+{"query": "Under what condition can someone outside a guild retrieve that guild's preview?", "relevant": [{"source": "resources/guild.mdx", "heading": "Get Guild Preview"}]}
+{"query": "Which Discord endpoint lists the default soundboard sounds available to all users?", "relevant": [{"source": "resources/soundboard.mdx", "heading": "List Default Soundboard Sounds"}]}
+{"query": "Which permission and request body format are required to create a guild sticker?", "relevant": [{"source": "resources/sticker.mdx", "heading": "Create Guild Sticker"}]}
+{"query": "What permission and image size limit apply when creating a guild emoji?", "relevant": [{"source": "resources/emoji.mdx", "heading": "Create Guild Emoji"}]}
+{"query": "Where does Discord document which Gateway close codes should not be reconnected after?", "relevant": [{"source": "topics/opcodes-and-status-codes.mdx", "heading": "Gateway Close Event Codes"}]}
+{"query": "Why should an OAuth2 client include a state parameter in its authorization request?", "relevant": [{"source": "topics/oauth2.mdx", "heading": "State and Security"}]}
