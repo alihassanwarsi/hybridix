@@ -3,7 +3,7 @@ from groq import Groq
 from pydantic import BaseModel, ConfigDict, StrictInt, ValidationError
 from hybridix.config import settings
 from hybridix.generation.citations import resolve_citations
-from hybridix.generation.context import build_context
+from hybridix.generation.context import build_context, merge_adjacent_results
 from hybridix.generation.prompts import load_prompt
 from hybridix.models import GeneratedAnswer, RetrievalResult
 
@@ -29,6 +29,8 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
 
     if not results:
         raise ValueError("No retrieved evidence provided.")
+
+    results = merge_adjacent_results(results)
 
     context = build_context(results)
 
@@ -104,4 +106,4 @@ def generate_answer(query: str, results: list[RetrievalResult]) -> GeneratedAnsw
 
     citations = resolve_citations(answer, results, require_citations=True)
 
-    return GeneratedAnswer(text=answer, citations=citations)
+    return GeneratedAnswer(text=answer, citations=citations, retrieved_evidence=results)
