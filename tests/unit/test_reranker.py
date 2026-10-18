@@ -44,36 +44,34 @@ def test_rerank_orders_by_model_score(monkeypatch):
     assert ranked[0].chunk.metadata.chunk_id == "b"
     assert ranked[1].chunk.metadata.chunk_id == "a"
 
+def test_reranked_search_uses_rrf_candidates(monkeypatch):
+    candidates = [
+        make_result("a", "first"),
+        make_result("b", "second"),
+    ]
 
-def test_reranked_search_uses_active_paths(monkeypatch, tmp_path):
-    dense_path = tmp_path / "version_002" / "dense"
-    sparse_path = tmp_path / "version_002" / "sparse"
+    hybrid = Mock(return_value=candidates)
+    rerank_mock = Mock(return_value=[candidates[1]])
 
-    resolver = Mock(return_value=(dense_path, sparse_path))
-    dense = Mock(return_value=[])
-    sparse = Mock(return_value=[])
-
-    monkeypatch.setattr(
-        reranker, "get_active_index_paths", resolver
-    )
-    monkeypatch.setattr(reranker, "dense_search", dense)
-    monkeypatch.setattr(reranker, "sparse_search", sparse)
+    monkeypatch.setattr(reranker, "hybrid_search", hybrid)
+    monkeypatch.setattr(reranker, "rerank", rerank_mock)
 
     results = reranker.reranked_search(
-        "test question", top_k=3, candidate_k=5
+        "test question",
+        top_k=1,
+        candidate_k=30
     )
 
-    assert results == []
-    resolver.assert_called_once_with()
+    assert results == [candidates[1]]
 
-    dense.assert_called_once_with(
+    hybrid.assert_called_once_with(
         "test question",
-        top_k=5,
-        index_path=dense_path
+        top_k=30,
+        candidate_k=30
     )
 
-    sparse.assert_called_once_with(
-        "test question",
-        top_k=5,
-        index_path=sparse_path
+    rerank_mock.assert_called_once_with(
+        query="test question",
+        results=candidates,
+        top_k=1
     )

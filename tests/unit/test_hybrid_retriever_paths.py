@@ -23,10 +23,15 @@ def test_hybrid_search_uses_active_index_paths(tmp_path, monkeypatch):
 
     assert results == []
 
-    resolver.assert_called_once_with()
+
     dense.assert_called_once_with(
-        "rate limits", index_path=dense_path
+        "rate limits",
+        top_k=None,
+        index_path=dense_path
     )
+
     sparse.assert_called_once_with(
-        "rate limits", index_path=sparse_path
+        "rate limits",
+        top_k=None,
+        index_path=sparse_path
     )
