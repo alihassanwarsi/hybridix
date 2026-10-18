@@ -6,11 +6,7 @@ from hybridix.retrieval.sparse_retriever import sparse_search
 
 @pytest.mark.parametrize("chunk_count", [1, 2, 29, 30])
 def test_sparse_search_handles_small_corpus(tmp_path, monkeypatch, chunk_count):
-    monkeypatch.setattr(
-        settings,
-        "sparse_index_path",
-        tmp_path / "sparse"
-    )
+    monkeypatch.setattr(settings, "sparse_index_path", tmp_path / "sparse")
 
     chunks = [
         Chunk(
@@ -27,51 +23,34 @@ def test_sparse_search_handles_small_corpus(tmp_path, monkeypatch, chunk_count):
     ]
 
     build_sparse_index(chunks)
-
     results = sparse_search("gateway sharding", top_k=30)
-
     assert len(results) == chunk_count
 
-    monkeypatch.setattr(
-    settings, "sparse_index_path", tmp_path / "missing"
-)
+    monkeypatch.setattr(settings, "sparse_index_path", tmp_path / "missing")
 
     explicit_results = sparse_search(
         "gateway sharding",
         top_k=30,
         index_path=tmp_path / "sparse"
     )
-
     assert len(explicit_results) == chunk_count
 
 def test_sparse_index_rejects_empty_corpus(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        settings,
-        "sparse_index_path",
-        tmp_path / "sparse"
-    )
+    monkeypatch.setattr(settings, "sparse_index_path", tmp_path / "sparse")
 
     with pytest.raises(ValueError, match="No chunks provided"):
         build_sparse_index([])
 
 def test_sparse_search_reports_missing_index(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        settings,
-        "sparse_index_path",
-        tmp_path / "missing_index",
-    )
+    monkeypatch.setattr(settings, "sparse_index_path", tmp_path / "missing_index")
 
     with pytest.raises(FileNotFoundError, match="Sparse index not found"):
         sparse_search("gateway sharding", top_k=5)
 
-
 def test_sparse_builder_uses_isolated_path(tmp_path, monkeypatch):
     old_path = tmp_path / "old_index"
     new_path = tmp_path / "new_index"
-
-    monkeypatch.setattr(
-        settings, "sparse_index_path", old_path
-    )
+    monkeypatch.setattr(settings, "sparse_index_path", old_path)
 
     chunk = Chunk(
         content="Discord uses rate limit buckets.",
@@ -91,3 +70,28 @@ def test_sparse_builder_uses_isolated_path(tmp_path, monkeypatch):
 
     with pytest.raises(FileExistsError):
         build_sparse_index([chunk], index_path=new_path)
+
+def test_sparse_search_excludes_zero_scores(tmp_path):
+    chunks = [
+        Chunk(
+            content=text,
+            metadata=ChunkMetadata(
+                source="test.md",
+                file_type="md",
+                chunk_id=f"chunk-{i}",
+                strategy="heading",
+                chunk_index=i
+            ),
+        )
+        for i, text in enumerate([
+            "apples bananas",
+            "goats elephants"
+        ])
+    ]
+
+    index_path = tmp_path / "sparse"
+    build_sparse_index(chunks, index_path=index_path)
+
+    results = sparse_search("apples", top_k=2, index_path=index_path)
+
+    assert [result.chunk.metadata.chunk_id for result in results] == ["chunk-0"]

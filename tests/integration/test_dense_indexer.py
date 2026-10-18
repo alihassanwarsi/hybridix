@@ -30,13 +30,7 @@ def test_embedding_failure_preserves_existing_index(monkeypatch):
     )
 
     reset = Mock()
-
-    monkeypatch.setattr(
-        dense_indexer,
-        "reset_collection",
-        reset
-    )
-
+    monkeypatch.setattr(dense_indexer, "reset_collection", reset)
     monkeypatch.setattr(
         dense_indexer,
         "embed_texts",
@@ -62,7 +56,6 @@ def test_successful_indexing_order(monkeypatch):
     )
 
     steps = []
-
     embeddings = Mock()
     embeddings.tolist.return_value = [[0.1, 0.2]]
 
@@ -71,20 +64,14 @@ def test_successful_indexing_order(monkeypatch):
         return embeddings
 
     collection = Mock()
-    collection.upsert.side_effect = (
-        lambda **kwargs: steps.append("upsert")
-    )
+    collection.upsert.side_effect = lambda **kwargs: steps.append("upsert")
 
     def fake_reset():
         steps.append("reset")
         return collection
 
-    monkeypatch.setattr(
-        dense_indexer, "embed_texts", fake_embed
-    )
-    monkeypatch.setattr(
-        dense_indexer, "reset_collection", fake_reset
-    )
+    monkeypatch.setattr(dense_indexer, "embed_texts", fake_embed)
+    monkeypatch.setattr(dense_indexer, "reset_collection", fake_reset)
 
     dense_indexer.build_dense_index([chunk])
 
@@ -98,12 +85,7 @@ def test_get_client_uses_explicit_paths(tmp_path, monkeypatch):
         calls.append(path)
         return object()
 
-    monkeypatch.setattr(
-        dense_indexer.chromadb,
-        "PersistentClient",
-        fake_client
-    )
-
+    monkeypatch.setattr(dense_indexer.chromadb, "PersistentClient", fake_client)
     dense_indexer._cached_client.cache_clear()
 
     first_path = tmp_path / "version_001" / "dense"
@@ -115,36 +97,51 @@ def test_get_client_uses_explicit_paths(tmp_path, monkeypatch):
 
     assert first is first_again
     assert first is not second
-    assert calls == [
-        str(first_path.resolve()),
-        str(second_path.resolve())
-    ]
+    assert calls == [str(first_path.resolve()), str(second_path.resolve())]
 
     dense_indexer._cached_client.cache_clear()
 
-
 def test_get_collection_uses_selected_path(tmp_path, monkeypatch):
     selected_path = tmp_path / "version_002" / "dense"
+    selected_path.mkdir(parents=True)
+    (selected_path / "chroma.sqlite3").touch()
 
-    fake_client = object()
-    fake_collection = object()
+    client = Mock()
+    collection = Mock()
+    client.get_collection.return_value = collection
 
-    def fake_get_client(index_path):
-        assert index_path == selected_path
-        return fake_client
+    get_client = Mock(return_value=client)
+    monkeypatch.setattr(dense_indexer, "get_client", get_client)
 
-    monkeypatch.setattr(
-        dense_indexer, "get_client", fake_get_client
+    assert dense_indexer.get_collection(selected_path) is collection
+
+    get_client.assert_called_once_with(selected_path)
+    client.get_collection.assert_called_once_with(
+        name=dense_indexer.settings.chroma_collection_name,
+        embedding_function=None,
     )
 
-    monkeypatch.setattr(
-        dense_indexer, "_get_or_create_collection",
-        lambda client: fake_collection
-    )
+def test_missing_collection_is_not_created(tmp_path, monkeypatch):
+    path = tmp_path / "dense"
+    client = chromadb.PersistentClient(path=str(path))
+    monkeypatch.setattr(dense_indexer, "get_client", lambda index_path: client)
 
-    result = dense_indexer.get_collection(selected_path)
+    with pytest.raises(FileNotFoundError, match="Dense collection"):
+        dense_indexer.get_collection(path)
 
-    assert result is fake_collection
+    assert client.list_collections() == []
+
+def test_missing_dense_index_is_not_created(tmp_path, monkeypatch):
+    path = tmp_path / "missing_dense"
+    get_client = Mock()
+    monkeypatch.setattr(dense_indexer, "get_client", get_client)
+
+    with pytest.raises(FileNotFoundError, match="Dense index not found"):
+        dense_indexer.get_collection(path)
+
+    assert not path.exists()
+    get_client.assert_not_called()
+
 
 def test_dense_builder_uses_isolated_path(tmp_path, monkeypatch):
     new_path = tmp_path / "new" / "dense"
@@ -164,20 +161,19 @@ def test_dense_builder_uses_isolated_path(tmp_path, monkeypatch):
     embeddings.tolist.return_value = [[0.1, 0.2]]
 
     collection = Mock()
-    get_collection = Mock(return_value=collection)
+    client = Mock()
+    get_client = Mock(return_value=client)
+    create_collection = Mock(return_value=collection)
     reset = Mock()
 
-    monkeypatch.setattr(
-        dense_indexer, "embed_texts", Mock(return_value=embeddings)
-    )
-    monkeypatch.setattr(dense_indexer, "get_collection", get_collection)
+    monkeypatch.setattr(dense_indexer, "embed_texts", Mock(return_value=embeddings))
+    monkeypatch.setattr(dense_indexer, "get_client", get_client)
+    monkeypatch.setattr(dense_indexer, "_get_or_create_collection", create_collection)
     monkeypatch.setattr(dense_indexer, "reset_collection", reset)
 
-    dense_indexer.build_dense_index(
-        [chunk],
-        index_path=new_path
-    )
+    dense_indexer.build_dense_index([chunk], index_path=new_path)
 
-    get_collection.assert_called_once_with(new_path)
+    get_client.assert_called_once_with(new_path)
+    create_collection.assert_called_once_with(client)
     collection.upsert.assert_called_once()
     reset.assert_not_called()

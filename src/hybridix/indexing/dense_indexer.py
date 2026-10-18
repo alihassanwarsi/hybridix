@@ -25,12 +25,23 @@ def _get_or_create_collection(client):
     )
 
 def get_collection(index_path: Path | None = None):
-    if index_path is None:
-        client = get_client()
-    else:
-        client = get_client(index_path)
+    path = index_path if index_path is not None else settings.dense_index_path
 
-    return _get_or_create_collection(client)
+    if not (path / "chroma.sqlite3").is_file():
+        raise FileNotFoundError(f"Dense index not found: {path}")
+
+    client = get_client(index_path)
+
+    try:
+        return client.get_collection(
+            name=settings.chroma_collection_name,
+            embedding_function=None
+        )
+    except NotFoundError as exc:
+        raise FileNotFoundError(
+            f"Dense collection '{settings.chroma_collection_name}' "
+            f"not found in {path}."
+        ) from exc
 
 def reset_collection():
     client = get_client()
@@ -79,7 +90,7 @@ def build_dense_index(chunks: list[Chunk], *, index_path: Path | None = None) ->
     if index_path is None:
         collection = reset_collection()
     else:
-        collection = get_collection(index_path)
+        collection = _get_or_create_collection(get_client(index_path))
 
     collection.upsert(
         ids=ids,

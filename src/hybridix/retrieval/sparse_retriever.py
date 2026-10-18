@@ -33,6 +33,9 @@ def sparse_search(query: str, top_k: int | None = None, *, index_path: Path | No
     retrieved = []
 
     for document, score in zip(results[0], scores[0]):
+        if score <= 0:
+            continue
+        
         chunk = Chunk(
             content=document["text"],
             metadata=ChunkMetadata(
