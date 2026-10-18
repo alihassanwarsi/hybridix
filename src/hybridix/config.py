@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     generation_model: str = "openai/gpt-oss-120b"
 
     openai_api_key: SecretStr | None = None
-    evaluation_model: str = "gpt-4.1"
+    evaluation_model: str = "gpt-4.1-mini"
 
     model_config = SettingsConfigDict(
         env_file=".env",
